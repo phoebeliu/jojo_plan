@@ -99,3 +99,7 @@ flowchart LR
 Cmd+N新工作；Cmd+Enter发送；Enter默认换行，输入法组合期间禁止误发送；Esc关闭详情并恢复触发点焦点。Tab按阅读顺序，覆盖抽屉/弹层管理焦点；日志默认不自动抢焦点，用户向上阅读后不强制滚到底；新消息用温和计数提示。停止/失败/等待均有文字。200%缩放可阅读，宽表只在自身滚动；禁止快捷键直接批准生产。
 
 组件：ConversationTimeline、Composer、PlanCard、ExecutionSummary、AgentTree、AgentInspector、ProcessLog、ArtifactCard/Preview、DecisionCard、ChangeImpact、UsageMeter、WorkTypePicker。正文、日志长列表虚拟化；200ms内反馈点击/输入状态为目标，模型延迟另列。所有界面状态来源为持久化服务和事件；设计稿演示状态不能当真实执行证据。
+
+## 项目层级澄清（用户确认）
+
+审计项目与护照校验项目为同级项目。审计项目下可有销售穿行、IPO 审计等工作；护照校验系统的工作属于独立的护照校验项目，不放在审计项目下。项目是业务归属，工作类型（制作 Skill、写文档、开发系统等）是执行方式，两者不能混为同一分类。IPO 审计在本稿仅作为归属示例，具体范围与交付要求尚未定义。
