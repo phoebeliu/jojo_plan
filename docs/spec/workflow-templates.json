@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "JP-1.0",
+  "version": "JP-1.1",
   "templates": {
     "system": [
       {
@@ -260,5 +260,10 @@
     "skillGroup": "compose requires skill_group in addition to skill when work config selects group",
     "completion": "delivered is run/work terminal state, not an additional stage",
     "documentRoles": "developer role uses document-authoring skill/tool subset here, no exec capability unless explicitly configured"
+  },
+  "templateVersions": {
+    "system": "1.0.0",
+    "skill": "1.0.0",
+    "document": "1.0.0"
   }
 }

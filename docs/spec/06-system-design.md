@@ -1,6 +1,6 @@
 # 系统分析设计
 
-JP-1.0｜架构基线。内部实体与接口以 [数据模型](07-data-model.md)、[接口契约](08-api-contracts.md)为准。
+JP-1.1｜架构基线。内部实体与接口以 [数据模型](07-data-model.md)、[接口契约](08-api-contracts.md)为准。
 
 ## 1. 部署及组件架构
 
@@ -10,6 +10,9 @@ flowchart TB
   UI --> P[受限 preload / typed IPC]
   P --> M[Main: 窗口 文件选择 凭据]
   M --> S[Utility Service: 领域命令与事件]
+  S --> CV[Conversation / 消息路由]
+  S --> RG[WorkTypeRegistry / 能力解析]
+  S --> EX[Execution Projection / 执行树和日志]
   S --> W[Workflow + Scheduler]
   S --> A[Artifact / Review / Change]
   S --> DB[(SQLite / WAL)]
@@ -26,7 +29,7 @@ flowchart TB
 
 本机 main 和 service 是可信边界；UI/生成内容不获得 Node、密钥、任意 IPC 或宿主文件访问。Worker 是受控运行代码，但 LLM 输出和下载资料不可信；只能使用 broker 注册工具。首版不监听公共 HTTP 端口，内部传输用 Electron IPC/MessagePort，所有载荷校验。
 
-建议代码目录（待研发创建）：apps/desktop（main/preload/renderer），packages/domain、storage、contracts、workflow、runtime-pi、tool-broker、artifacts、release、ui；tests/contracts、integration、e2e、fixtures。运行时第三方细节只能出现在 runtime-pi 和 adapters，不能渗透 PRD 状态机。
+建议代码目录（待研发创建）：apps/desktop（main/preload/renderer），packages/domain、conversation、work-types、execution-view、storage、contracts、workflow、runtime-pi、tool-broker、artifacts、release、ui；tests/contracts、integration、e2e、fixtures。运行时第三方细节只能出现在 runtime-pi 和 adapters，不能渗透 PRD 状态机。
 
 ## 2. 模块职责
 
@@ -99,7 +102,7 @@ sequenceDiagram
 1. 用户命令携 requestId 和 expectedRevision；去重命中返回原结果。状态与事件在同一事务提交。
 2. 写文件先落临时对象、fsync、原子 rename 为 sha256 对象，再提交版本引用。DB 失败留下无引用对象；后台只清理超过 24h 且无引用的临时/孤立对象。
 3. 工具执行先记录 intent。纯读取可重试；文件写入比较目标哈希；容器命令查容器/日志；发布查外部 run。未知结果进入 uncertain，不能假定没执行。
-4. 模型流只把完成的消息/工具结果作为恢复边界；中断的流标为 partial，不当成最终答案。新 attempt 使用已完成消息和版本引用恢复，不重新执行已确认写操作。
+4. 模型流只把完成的消息/工具结果作为恢复边界；中断的流标为 interrupted，不当成最终答案。新 attempt 使用已完成消息和版本引用恢复，不重新执行已确认写操作。
 5. main/service 崩溃后扫描 running attempts 和 operations，逐一核对；有未知副作用的任务禁止自动重试。只读/模型调用可在确认预算后重试，重复计费风险记录用量未知。
 6. 睡眠前尽力暂停调度和保存，不能假设一定收到通知；唤醒走同样核对流程。关闭窗口可保留 app 运行；Cmd+Q 默认暂停并退出，提示当前外部发布是否仍在进行。
 
@@ -113,8 +116,33 @@ sequenceDiagram
 
 首版不做向量库：SQLite FTS 文本检索及文件引用足够用于定义的规模；大内容分块按需读取。索引可重建，不作为原件。列表分页默认 50、最大 200；事件长列表增量获取，输出正文按需加载。
 
-默认单输出文件 50MB，单工具日志 5MB 内联上限（完整日志单独对象，最大 50MB）；超限截断附说明，不截断审批/发布证据。缓存和保留策略见运行文档。
+默认单输出文件50MB；JP-1.1进程日志按每块16KB、每进程10MB环形保留，明确截断。测试/审批/发布必需证据另存不可变对象，不能以易截断日志代替。缓存和保留策略见运行文档。
 
 ## 9. 组件验证顺序
 
 先 fake runtime 完成状态/恢复/权限契约 → Pi 能力验证 → 文件/技能/文档闭环 → 研发、测试及变更 → pipeline 和安装包。阶段入口与数据契约可以先独立实现；未通过外部依赖实验的能力保持 unavailable。
+
+## 10. 对话与执行投影
+
+Conversation Service持久化原始消息，协调者只产生建议与角色任务；Workflow仍负责阶段门槛。WorkTypeRegistry解析包版本与能力，替代按kind硬编码流程的分支。Execution Projection只读取task/attempt/tool/process构造树，不维护另一套假进度；进程状态由broker上报，模型文字不能更新它。
+
+```mermaid
+sequenceDiagram
+ participant U as 用户对话
+ participant S as Conversation Service
+ participant DB as 持久化服务
+ participant W as Scheduler
+ participant A as 主协调/目标Agent
+ U->>S: conversation.send(messageId)
+ S->>DB: 消息+去重+created事件同事务
+ S-->>U: accepted
+ S->>DB: queued
+ W->>DB: 安全边界领取消息+预算+锁定输入
+ W->>A: 输入快照包含messageId
+ DB-->>U: applied事件及attempt引用
+ A-->>S: 简短答复/任务提案/变更提案
+ S->>DB: 校验并持久化；不直接批准基线
+ DB-->>U: 消息+执行树/成果事件
+```
+
+具体字段、取消分支、限额和恢复见[扩展协议](15-conversation-and-extension.md)。消息状态applied与输入快照在派发前同事务落盘；若派发失败，attempt标失败/待核对，UI同时显示，不把applied解释为已成功执行。

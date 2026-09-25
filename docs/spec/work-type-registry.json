@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "packages": [
+    {
+      "kind": "skill",
+      "version": "1.0.0",
+      "label": "制作 Skill",
+      "status": "enabled",
+      "templateRef": "skill@1.0.0",
+      "roles": [
+        "coordinator",
+        "developer",
+        "final_reviewer",
+        "product",
+        "researcher",
+        "tester"
+      ],
+      "skills": [
+        {
+          "key": "skill-core",
+          "version": "1.0.0",
+          "required": true
+        }
+      ],
+      "requiredCapabilities": [
+        "model.chat",
+        "search.web"
+      ],
+      "artifactKinds": [
+        "decision_log",
+        "research",
+        "review_report",
+        "skill",
+        "test_evidence"
+      ],
+      "viewerKeys": [
+        "markdown",
+        "file-list"
+      ],
+      "exportFormats": [
+        "md",
+        "zip"
+      ]
+    },
+    {
+      "kind": "document",
+      "version": "1.0.0",
+      "label": "写文档",
+      "status": "enabled",
+      "templateRef": "document@1.0.0",
+      "roles": [
+        "coordinator",
+        "developer",
+        "final_reviewer",
+        "product",
+        "tester"
+      ],
+      "skills": [
+        {
+          "key": "document-core",
+          "version": "1.0.0",
+          "required": true
+        }
+      ],
+      "requiredCapabilities": [
+        "model.chat",
+        "document.export"
+      ],
+      "artifactKinds": [
+        "decision_log",
+        "document",
+        "review_report"
+      ],
+      "viewerKeys": [
+        "markdown",
+        "pdf"
+      ],
+      "exportFormats": [
+        "md",
+        "html",
+        "pdf",
+        "docx",
+        "zip"
+      ]
+    },
+    {
+      "kind": "system",
+      "version": "1.0.0",
+      "label": "开发系统",
+      "status": "enabled",
+      "templateRef": "system@1.0.0",
+      "roles": [
+        "architect",
+        "coordinator",
+        "developer",
+        "evaluator",
+        "final_reviewer",
+        "product",
+        "release_manager",
+        "researcher",
+        "tester",
+        "ux"
+      ],
+      "skills": [
+        {
+          "key": "system-core",
+          "version": "1.0.0",
+          "required": true
+        }
+      ],
+      "requiredCapabilities": [
+        "model.chat",
+        "container.exec"
+      ],
+      "artifactKinds": [
+        "architecture",
+        "briefing",
+        "code_snapshot",
+        "decision_log",
+        "prd",
+        "release_manifest",
+        "research",
+        "review_report",
+        "test_design",
+        "test_evidence",
+        "ux"
+      ],
+      "viewerKeys": [
+        "markdown",
+        "image",
+        "file-list"
+      ],
+      "exportFormats": [
+        "md",
+        "html",
+        "pdf",
+        "zip"
+      ]
+    },
+    {
+      "kind": "presentation",
+      "version": "1.0.0",
+      "label": "写 PPT",
+      "status": "planned",
+      "templateRef": "presentation@1.0.0",
+      "roles": [
+        "coordinator",
+        "researcher",
+        "storyteller",
+        "designer",
+        "reviewer"
+      ],
+      "skills": [
+        {
+          "key": "presentation-core",
+          "version": "1.0.0",
+          "required": true
+        }
+      ],
+      "requiredCapabilities": [
+        "model.chat",
+        "pptx.generate",
+        "pptx.render"
+      ],
+      "artifactKinds": [
+        "brief",
+        "storyline",
+        "slide-deck-spec",
+        "editable-pptx",
+        "page-previews",
+        "render-review"
+      ],
+      "viewerKeys": [
+        "slide-preview",
+        "file-list"
+      ],
+      "exportFormats": [
+        "pptx",
+        "pdf",
+        "zip"
+      ]
+    }
+  ]
+}

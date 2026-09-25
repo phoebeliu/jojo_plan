@@ -1,4 +1,4 @@
-"""Validate JP-1.0 documentation contracts (not application implementation).
+"""Validate JP-1.1 documentation contracts (not application implementation).
 Requires Python 3.9+ and jsonschema 4.x. Run from any directory.
 """
 from pathlib import Path
@@ -33,8 +33,8 @@ db.executescript((ROOT/'schema.sql').read_text())
 check('SQL foreign keys enabled', db.execute('PRAGMA foreign_keys').fetchone()[0]==1)
 insert(db,'project',id='p',name='synthetic',root_path='/tmp/jp-check',policy_json='{}',created_at='t',updated_at='t')
 insert(db,'work_item',id='w',project_id='p',name='work',kind='system',goal='test',mode='checkpoint',state='draft',created_at='t',updated_at='t')
-insert(db,'workflow_run',id='r',work_id='w',template_version='JP-1.0',state='running',config_json='{}',created_at='t')
-check('At most one live workflow per work', rejected(db,"INSERT INTO workflow_run(id,work_id,template_version,state,config_json,created_at) VALUES('r2','w','JP-1.0','running','{}','t')"))
+insert(db,'workflow_run',id='r',work_id='w',template_version='JP-1.1',state='running',config_json='{}',created_at='t')
+check('At most one live workflow per work', rejected(db,"INSERT INTO workflow_run(id,work_id,template_version,state,config_json,created_at) VALUES('r2','w','JP-1.1','running','{}','t')"))
 insert(db,'stage_run',id='s',run_id='r',stage_key='prd',state='active')
 insert(db,'artifact',id='a',project_id='p',work_id='w',kind='prd',title='test',sensitivity='internal',created_at='t')
 insert(db,'artifact_version',id='v',artifact_id='a',version=1,object_hash='a'*64,mime='text/markdown',size_bytes=5,author_kind='user',author_id='owner',metadata_json='{}',created_at='t')
@@ -67,6 +67,26 @@ db.execute("UPDATE project SET state='deleted' WHERE id='p'")
 db.execute("DELETE FROM baseline_member WHERE baseline_id='b'")
 check('Purge can remove sealed member only after project deleted',db.execute('SELECT COUNT(*) FROM baseline_member').fetchone()[0]==0)
 tables=db.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'").fetchone()[0]
+
+# JP-1.1 SQL invariants: registered extensions, immutable messages and bounded logs.
+insert(db,'work_type_version',kind='synthetic',version='1.0.0',label='Synthetic',status='enabled',manifest_json='{}')
+insert(db,'work_item',id='w-ext',project_id='p',name='extension',kind='synthetic',goal='test',mode='checkpoint',state='draft',created_at='t',updated_at='t')
+check('Registered fourth kind needs no SQL enum edit',db.execute("SELECT kind FROM work_item WHERE id='w-ext'").fetchone()[0]=='synthetic')
+check('Unknown work package version rejected',rejected(db,"UPDATE work_item SET work_type_version='missing' WHERE id='w-ext'"))
+check('Work package manifest immutable',rejected(db,"UPDATE work_type_version SET manifest_json='[]' WHERE kind='synthetic'"))
+check('Task self parent rejected',rejected(db,"UPDATE task SET parent_task_id='task' WHERE id='task'"))
+insert(db,'conversation',id='conv',work_id='w',created_at='t')
+check('One main conversation per work',rejected(db,"INSERT INTO conversation VALUES('conv2','w','t')"))
+insert(db,'conversation_message',id='msg',conversation_id='conv',seq=1,sender='user',text='Please clarify',attachments_json='[]',state='accepted',created_at='t')
+check('Original user message immutable',rejected(db,"UPDATE conversation_message SET text='changed' WHERE id='msg'"))
+check('Applied message requires attempt and time',rejected(db,"UPDATE conversation_message SET state='applied' WHERE id='msg'"))
+db.execute("UPDATE conversation_message SET state='applied',applied_attempt_id='attempt',applied_at='t' WHERE id='msg'")
+check('Message application linked to actual attempt',db.execute("SELECT applied_attempt_id FROM conversation_message WHERE id='msg'").fetchone()[0]=='attempt')
+check('Duplicate message sequence rejected',rejected(db,"INSERT INTO conversation_message(id,conversation_id,seq,sender,text,attachments_json,state,created_at) VALUES('msg2','conv',1,'user','x','[]','accepted','t')"))
+insert(db,'execution_process',id='proc',operation_id='op',executor_ref='test-container',state='running')
+insert(db,'process_log_chunk',process_id='proc',seq=1,stream='stdout',text='redacted',created_at='t')
+check('Oversize process chunk rejected',rejected(db,"INSERT INTO process_log_chunk VALUES('proc',2,'stdout',?,'t')",('x'*16385,)))
+check('JP-1.1 foreign keys consistent',not db.execute('PRAGMA foreign_key_check').fetchall())
 
 # JSON Schema: validate meta-schema, all method branches and representative negative cases.
 schema=json.loads((ROOT/'contracts.schema.json').read_text())
@@ -104,15 +124,37 @@ for b in branches:
     wrong=copy.deepcopy(cmd);wrong['payload']['unexpectedField']=True
     check('Reject unknown payload field: '+cmd['method'],not validator.is_valid(wrong))
 check('All method branches accept schema-valid examples',True)
-wrong=copy.deepcopy(examples['command']);wrong['payload']['kind']='other'
-check('Unknown work kind rejected by API schema',not validator.is_valid(wrong))
+wrong=copy.deepcopy(examples['command']);wrong['payload']['kind']='INVALID KEY'
+check('Malformed work kind rejected by API schema',not validator.is_valid(wrong))
 wrong=copy.deepcopy(examples['command']);wrong['requestId']='not-a-uuid'
 check('Invalid request UUID rejected',not validator.is_valid(wrong))
 wrong=copy.deepcopy(examples['command']);wrong['actor']='user'
 check('Caller cannot add actor to envelope',not validator.is_valid(wrong))
 
+# Declarative registry consistency, unknown fields and future capability boundary.
+registry=json.loads((ROOT/'work-type-registry.json').read_text())
+regschema=json.loads((ROOT/'work-type.schema.json').read_text())
+Draft202012Validator.check_schema(regschema)
+regvalidator=Draft202012Validator(regschema)
+regvalidator.validate(registry)
+check('Work type registry validates',True)
+check('Exactly three enabled initial packages', {m['kind'] for m in registry['packages'] if m['status']=='enabled'}=={'skill','document','system'})
+check('PPT explicitly planned with generation and rendering requirements',any(m['kind']=='presentation' and m['status']=='planned' and {'pptx.generate','pptx.render'}<=set(m['requiredCapabilities']) for m in registry['packages']))
+wrongreg=copy.deepcopy(registry);wrongreg['packages'][0]['script']='untrusted.js'
+check('Registry rejects executable script field',not regvalidator.is_valid(wrongreg))
+for m in registry['packages']:
+ stored=json.loads(db.execute('SELECT manifest_json FROM work_type_version WHERE kind=? AND version=?',(m['kind'],m['version'])).fetchone()[0])
+ check('SQL seed matches registry '+m['kind'],stored==m)
+validextension=copy.deepcopy(examples['command']);validextension['payload']['kind']='synthetic'
+check('API allows valid extension key for service registry lookup',validator.is_valid(validextension))
+
 # Graph and traceability completeness.
 workflow=json.loads((ROOT/'workflow-templates.json').read_text())
+for m in registry['packages']:
+    if m['status']=='enabled':
+        key,version=m['templateRef'].split('@')
+        check('Enabled package resolves template '+key,key in workflow['templates'] and workflow['templateVersions'][key]==version)
+        check('Manifest covers all stage artifacts '+key,set(m['artifactKinds'])=={a for st in workflow['templates'][key] for a in st['requiredArtifactKinds']})
 for name,stages in workflow['templates'].items():
     bykey={s['key']:s for s in stages};done=set()
     check(name+' stage keys unique',len(bykey)==len(stages))
@@ -124,13 +166,13 @@ for name,stages in workflow['templates'].items():
 prd=(ROOT/'03-prd.md').read_text();matrix=(ROOT/'12-development-plan.md').read_text()
 frs=set(re.findall(r'^\| (FR-\d+) \|',prd,re.M))
 coverage=set(re.findall(r'^\| (FR-\d+) \|',matrix,re.M))
-check('All 25 FRs covered by traceability matrix',len(frs)==25 and frs==coverage)
+check('All 28 FRs covered by traceability matrix',len(frs)==28 and frs==coverage)
 tests=set(re.findall(r'^\| (T-\d+) P[012] \|',(ROOT/'11-test-design.md').read_text(),re.M))
-check('40 distinct test cases',len(tests)==40)
+check('48 distinct test cases',len(tests)==48)
 check('Traceability test references exist',set(re.findall(r'T-\d+',matrix))<=tests)
 uxids=set(re.findall(r'^\| (UI-\d+) \|',(ROOT/'04-ux-spec.md').read_text(),re.M))
 html=(ROOT.parent/'design/screenboard.html').read_text()
-check('14 UI screens represented in design board',len(uxids)==14 and all(f'id="{x}"' in html for x in uxids))
+check('5 UI surfaces represented in design board',len(uxids)==5 and all(f'id="{x}"' in html for x in uxids))
 check('Traceability UI references exist',set(re.findall(r'UI-\d+',matrix))<=uxids)
 
 # Check local Markdown links in the authoritative pack (excluding fragments/web URLs).
@@ -141,7 +183,7 @@ for p in ROOT.glob('*.md'):
         target=target.strip('<>').split('#')[0]
         check('Link exists '+p.name+' -> '+target,(p.parent/target).exists())
         link_count+=1
-print('JP-1.0 specification validation: PASS')
+print('JP-1.1 specification validation: PASS')
 print(f'{len(checks)} checks; {tables} SQL tables; {len(branches)} API methods; 3 workflow DAGs; {link_count} local links')
 print('Scope: document/schema validation only. No application, provider, container or production execution tests were run by this script.')
 for name in checks:print('PASS '+name)

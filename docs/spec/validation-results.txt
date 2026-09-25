@@ -1,5 +1,5 @@
-JP-1.0 specification validation: PASS
-129 checks; 40 SQL tables; 46 API methods; 3 workflow DAGs; 32 local links
+JP-1.1 specification validation: PASS
+170 checks; 45 SQL tables; 52 API methods; 3 workflow DAGs; 41 local links
 Scope: document/schema validation only. No application, provider, container or production execution tests were run by this script.
 PASS SQL foreign keys enabled
 PASS At most one live workflow per work
@@ -18,6 +18,17 @@ PASS Tool idempotency keys unique per project
 PASS Pass result requires evidence reference
 PASS No foreign key inconsistencies
 PASS Purge can remove sealed member only after project deleted
+PASS Registered fourth kind needs no SQL enum edit
+PASS Unknown work package version rejected
+PASS Work package manifest immutable
+PASS Task self parent rejected
+PASS One main conversation per work
+PASS Original user message immutable
+PASS Applied message requires attempt and time
+PASS Message application linked to actual attempt
+PASS Duplicate message sequence rejected
+PASS Oversize process chunk rejected
+PASS JP-1.1 foreign keys consistent
 PASS Command and response examples validate
 PASS Reject unknown payload field: project.create
 PASS Reject unknown payload field: project.list
@@ -65,10 +76,31 @@ PASS Reject unknown payload field: skill.list
 PASS Reject unknown payload field: issue.list
 PASS Reject unknown payload field: release.targets
 PASS Reject unknown payload field: source.register
+PASS Reject unknown payload field: worktype.list
+PASS Reject unknown payload field: conversation.list
+PASS Reject unknown payload field: conversation.send
+PASS Reject unknown payload field: execution.snapshot
+PASS Reject unknown payload field: execution.logs
+PASS Reject unknown payload field: execution.cancelTask
 PASS All method branches accept schema-valid examples
-PASS Unknown work kind rejected by API schema
+PASS Malformed work kind rejected by API schema
 PASS Invalid request UUID rejected
 PASS Caller cannot add actor to envelope
+PASS Work type registry validates
+PASS Exactly three enabled initial packages
+PASS PPT explicitly planned with generation and rendering requirements
+PASS Registry rejects executable script field
+PASS SQL seed matches registry skill
+PASS SQL seed matches registry document
+PASS SQL seed matches registry system
+PASS SQL seed matches registry presentation
+PASS API allows valid extension key for service registry lookup
+PASS Enabled package resolves template skill
+PASS Manifest covers all stage artifacts skill
+PASS Enabled package resolves template document
+PASS Manifest covers all stage artifacts document
+PASS Enabled package resolves template system
+PASS Manifest covers all stage artifacts system
 PASS system stage keys unique
 PASS system dependency progress 0
 PASS system dependency progress 1
@@ -93,20 +125,21 @@ PASS document dependency progress 2
 PASS document dependency progress 3
 PASS document dependency progress 4
 PASS document every stage has outputs and roles
-PASS All 25 FRs covered by traceability matrix
-PASS 40 distinct test cases
+PASS All 28 FRs covered by traceability matrix
+PASS 48 distinct test cases
 PASS Traceability test references exist
-PASS 14 UI screens represented in design board
+PASS 5 UI surfaces represented in design board
 PASS Traceability UI references exist
 PASS Link exists 06-system-design.md -> 07-data-model.md
 PASS Link exists 06-system-design.md -> 08-api-contracts.md
+PASS Link exists 06-system-design.md -> 15-conversation-and-extension.md
 PASS Link exists 13-readiness-review.md -> validate_spec.py
 PASS Link exists 13-readiness-review.md -> validation-results.txt
 PASS Link exists 04-ux-spec.md -> 03-prd.md
 PASS Link exists 04-ux-spec.md -> ../design/screenboard.html
-PASS Link exists 04-ux-spec.md -> ../design/project-overview.png
-PASS Link exists 04-ux-spec.md -> ../design/artifact-review.png
+PASS Link exists 04-ux-spec.md -> 15-conversation-and-extension.md
 PASS Link exists 07-data-model.md -> schema.sql
+PASS Link exists 07-data-model.md -> 15-conversation-and-extension.md
 PASS Link exists 00-reading-guide.md -> 01-owner-decisions.md
 PASS Link exists 00-reading-guide.md -> 02-research-and-adrs.md
 PASS Link exists 00-reading-guide.md -> 03-prd.md
@@ -123,10 +156,18 @@ PASS Link exists 00-reading-guide.md -> 10-security-and-operations.md
 PASS Link exists 00-reading-guide.md -> 11-test-design.md
 PASS Link exists 00-reading-guide.md -> 12-development-plan.md
 PASS Link exists 00-reading-guide.md -> 13-readiness-review.md
+PASS Link exists 00-reading-guide.md -> 15-conversation-and-extension.md
 PASS Link exists 00-reading-guide.md -> 14-artifact-content-contracts.md
+PASS Link exists 00-reading-guide.md -> 04-ux-spec.md
+PASS Link exists 00-reading-guide.md -> 15-conversation-and-extension.md
 PASS Link exists 02-research-and-adrs.md -> ../research.md
 PASS Link exists 03-prd.md -> ../work-scenarios.md
 PASS Link exists 03-prd.md -> 01-owner-decisions.md
+PASS Link exists 03-prd.md -> 15-conversation-and-extension.md
+PASS Link exists 15-conversation-and-extension.md -> work-type-registry.json
+PASS Link exists 15-conversation-and-extension.md -> work-type.schema.json
 PASS Link exists 09-workflows-and-agents.md -> workflow-templates.json
 PASS Link exists 09-workflows-and-agents.md -> 14-artifact-content-contracts.md
+PASS Link exists 09-workflows-and-agents.md -> 15-conversation-and-extension.md
 PASS Link exists 08-api-contracts.md -> contracts.schema.json
+PASS Link exists 08-api-contracts.md -> 15-conversation-and-extension.md

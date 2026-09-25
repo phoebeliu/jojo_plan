@@ -1,12 +1,18 @@
 # 数据模型与存储协议
 
-JP-1.0｜[schema.sql](schema.sql)可在 SQLite 中执行，作为首版 migration 的设计输入，不是已经运行的应用数据库。
+JP-1.1｜[schema.sql](schema.sql)可在 SQLite 中执行，作为首版 migration 的设计输入，不是已经运行的应用数据库。
 
 ## 1. ER 图（主关系）
 
 ```mermaid
 erDiagram
  PROJECT ||--o{ WORK_ITEM : contains
+ WORK_TYPE_VERSION ||--o{ WORK_ITEM : configures
+ WORK_ITEM ||--|| CONVERSATION : contains
+ CONVERSATION ||--o{ CONVERSATION_MESSAGE : records
+ TASK ||--o{ TASK : delegates
+ TOOL_OPERATION ||--o{ EXECUTION_PROCESS : spawns
+ EXECUTION_PROCESS ||--o{ PROCESS_LOG_CHUNK : logs
  WORK_ITEM ||--o{ WORKFLOW_RUN : executes
  WORKFLOW_RUN ||--o{ STAGE_RUN : stages
  STAGE_RUN ||--o{ TASK : schedules
@@ -39,7 +45,7 @@ erDiagram
 | 实体 | 要点 |
 | --- | --- |
 | project | root_path 是应用管理项目目录的规范路径，不能任意指向系统根；policy_json 包含发送模型、网络、容器、Git 策略 |
-| work_item | 三种 kind；mode=checkpoint/explore；goal 为用户原始目标，修订有事件历史 |
+| work_item | kind和work_type_version复合外键指向工作包注册表；mode=checkpoint/explore；goal 为用户原始目标，修订有事件历史 |
 | workflow_run | 锁定 template_version 与 config_json；每工作至多一个非终态运行 |
 | stage_run | stage_key 与 iteration 唯一；迭代保留旧阶段，不覆盖上一轮验证 |
 | artifact/version | artifact 表身份，version 表不可变内容；metadata 保存来源、生成器、引用与编码信息 |
@@ -54,7 +60,7 @@ erDiagram
 
 ## 3. 产物类型与 JSON 约定
 
-artifact.kind 首版枚举在服务层：source、research、prd、ux、architecture、test_design、briefing、decision_log、skill、skill_group、document、rule、dataset、model_config、prompt、code_snapshot、test_evidence、review_report、release_manifest、operation_log。SQL 留字符串以便添加类型，未知类型必须拒绝普通创建命令，只能经 migration/template 升级新增。
+artifact.kind 的首批内置类型：source、research、prd、ux、architecture、test_design、briefing、decision_log、skill、skill_group、document、rule、dataset、model_config、prompt、code_snapshot、test_evidence、review_report、release_manifest、operation_log。SQL 留字符串以便添加类型，未知类型必须拒绝普通创建命令；新增类型通过已审核工作包的artifactKinds注册与内容契约校验，不需改数据库枚举。
 
 version.metadata：schemaVersion、generator(name/version)、sourceRefs(versionId/spanId)、evidenceKind(user_provided/retrieved/inferred/measured/synthetic)、taskId?、formatOptions?。原始密钥禁止入任何 JSON。
 
@@ -91,3 +97,7 @@ release_target.contract_json：triggerUrl、statusUrlTemplate、rollbackUrl?、a
 ## 7. 来源
 
 持久化实现需遵循 SQLite 官方 [WAL](https://www.sqlite.org/wal.html) 与 [外键](https://www.sqlite.org/foreignkeys.html)说明；上面的模式与约束是本项目设计。
+
+## JP-1.1 新增实体
+
+work_type_version锁定工作包内容，允许改变启用状态；conversation每工作唯一；conversation_message按会话seq排序并记录实际应用attempt，原用户消息不可改写；execution_process关联工具操作；process_log_chunk按进程序号读取且仅存脱敏文本。task新增parent_task_id用于层级，依赖仍在task_dependency。完整行为与试验库迁移见[扩展协议](15-conversation-and-extension.md)。work.create同事务创建工作与空主对话；首次消息通过conversation.send追加。

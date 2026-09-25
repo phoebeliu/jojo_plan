@@ -1,4 +1,4 @@
--- JP-1.0 executable schema specification. UTC ISO timestamps; UUID IDs except event seq.
+-- JP-1.1 executable schema specification. UTC ISO timestamps; UUID IDs except event seq.
 PRAGMA foreign_keys=ON;
 PRAGMA journal_mode=WAL;
 PRAGMA synchronous=FULL;
@@ -20,12 +20,26 @@ CREATE TABLE capability_check(
  capabilities_json TEXT NOT NULL CHECK(json_valid(capabilities_json)), status TEXT NOT NULL CHECK(status IN ('passed','partial','failed')),
  checked_at TEXT NOT NULL, evidence_hash TEXT
 );
+CREATE TABLE work_type_version(
+ kind TEXT NOT NULL, version TEXT NOT NULL, label TEXT NOT NULL,
+ status TEXT NOT NULL CHECK(status IN ('enabled','planned','disabled')),
+ manifest_json TEXT NOT NULL CHECK(json_valid(manifest_json)),
+ PRIMARY KEY(kind,version)
+);
+INSERT INTO work_type_version VALUES
+ ('skill','1.0.0','制作 Skill','enabled','{"kind":"skill","version":"1.0.0","label":"制作 Skill","status":"enabled","templateRef":"skill@1.0.0","roles":["coordinator","developer","final_reviewer","product","researcher","tester"],"skills":[{"key":"skill-core","version":"1.0.0","required":true}],"requiredCapabilities":["model.chat","search.web"],"artifactKinds":["decision_log","research","review_report","skill","test_evidence"],"viewerKeys":["markdown","file-list"],"exportFormats":["md","zip"]}'),
+ ('document','1.0.0','写文档','enabled','{"kind":"document","version":"1.0.0","label":"写文档","status":"enabled","templateRef":"document@1.0.0","roles":["coordinator","developer","final_reviewer","product","tester"],"skills":[{"key":"document-core","version":"1.0.0","required":true}],"requiredCapabilities":["model.chat","document.export"],"artifactKinds":["decision_log","document","review_report"],"viewerKeys":["markdown","pdf"],"exportFormats":["md","html","pdf","docx","zip"]}'),
+ ('system','1.0.0','开发系统','enabled','{"kind":"system","version":"1.0.0","label":"开发系统","status":"enabled","templateRef":"system@1.0.0","roles":["architect","coordinator","developer","evaluator","final_reviewer","product","release_manager","researcher","tester","ux"],"skills":[{"key":"system-core","version":"1.0.0","required":true}],"requiredCapabilities":["model.chat","container.exec"],"artifactKinds":["architecture","briefing","code_snapshot","decision_log","prd","release_manifest","research","review_report","test_design","test_evidence","ux"],"viewerKeys":["markdown","image","file-list"],"exportFormats":["md","html","pdf","zip"]}'),
+ ('presentation','1.0.0','写 PPT','planned','{"kind":"presentation","version":"1.0.0","label":"写 PPT","status":"planned","templateRef":"presentation@1.0.0","roles":["coordinator","researcher","storyteller","designer","reviewer"],"skills":[{"key":"presentation-core","version":"1.0.0","required":true}],"requiredCapabilities":["model.chat","pptx.generate","pptx.render"],"artifactKinds":["brief","storyline","slide-deck-spec","editable-pptx","page-previews","render-review"],"viewerKeys":["slide-preview","file-list"],"exportFormats":["pptx","pdf","zip"]}');
+CREATE TRIGGER work_type_content_immutable BEFORE UPDATE OF kind,version,label,manifest_json ON work_type_version
+ BEGIN SELECT RAISE(ABORT,'immutable work type version'); END;
 CREATE TABLE work_item(
  id TEXT PRIMARY KEY, project_id TEXT NOT NULL REFERENCES project(id), name TEXT NOT NULL,
- kind TEXT NOT NULL CHECK(kind IN ('skill','document','system')), goal TEXT NOT NULL,
+ kind TEXT NOT NULL, work_type_version TEXT NOT NULL DEFAULT '1.0.0', goal TEXT NOT NULL,
  mode TEXT NOT NULL CHECK(mode IN ('checkpoint','explore')),
  state TEXT NOT NULL CHECK(state IN ('draft','active','paused','blocked','cancelled','delivered')),
- revision INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL, updated_at TEXT NOT NULL
+ revision INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
+ FOREIGN KEY(kind,work_type_version) REFERENCES work_type_version(kind,version)
 );
 CREATE TABLE workflow_run(
  id TEXT PRIMARY KEY, work_id TEXT NOT NULL REFERENCES work_item(id), template_version TEXT NOT NULL,
@@ -95,7 +109,7 @@ CREATE TABLE decision(
  impact_json TEXT NOT NULL CHECK(json_valid(impact_json)), revision INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL
 );
 CREATE TABLE task(
- id TEXT PRIMARY KEY, stage_id TEXT NOT NULL REFERENCES stage_run(id), role TEXT NOT NULL, title TEXT NOT NULL,
+ id TEXT PRIMARY KEY, stage_id TEXT NOT NULL REFERENCES stage_run(id), parent_task_id TEXT REFERENCES task(id) CHECK(parent_task_id IS NULL OR parent_task_id<>id), role TEXT NOT NULL, title TEXT NOT NULL,
  state TEXT NOT NULL CHECK(state IN ('queued','running','waiting','paused','succeeded','failed','cancelled','stale')),
  input_baseline_id TEXT REFERENCES baseline(id), input_fingerprint TEXT, spec_json TEXT NOT NULL CHECK(json_valid(spec_json)),
  attempt_count INTEGER NOT NULL DEFAULT 0, revision INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL
@@ -222,3 +236,35 @@ CREATE INDEX events_by_project ON domain_event(project_id,seq);
 CREATE INDEX issues_by_work_state ON review_issue(work_id,status);
 CREATE INDEX sources_by_version ON source_span(version_id);
 CREATE INDEX operations_by_state ON tool_operation(project_id,state);
+
+-- JP-1.1 conversation and execution visibility. Cross-work membership validated by service.
+CREATE TABLE conversation(
+ id TEXT PRIMARY KEY, work_id TEXT NOT NULL UNIQUE REFERENCES work_item(id), created_at TEXT NOT NULL
+);
+CREATE TABLE conversation_message(
+ id TEXT PRIMARY KEY, conversation_id TEXT NOT NULL REFERENCES conversation(id), seq INTEGER NOT NULL CHECK(seq>0),
+ sender TEXT NOT NULL CHECK(sender IN ('user','agent','system')),
+ attempt_id TEXT REFERENCES run_attempt(id), target_task_id TEXT REFERENCES task(id),
+ text TEXT NOT NULL, attachments_json TEXT NOT NULL CHECK(json_valid(attachments_json)),
+ state TEXT NOT NULL CHECK(state IN ('accepted','queued','applied','needs_action','streaming','final','interrupted')),
+ applied_attempt_id TEXT REFERENCES run_attempt(id), applied_at TEXT,
+ revision INTEGER NOT NULL DEFAULT 1, created_at TEXT NOT NULL,
+ UNIQUE(conversation_id,seq),
+ CHECK(state<>'applied' OR (applied_attempt_id IS NOT NULL AND applied_at IS NOT NULL)),
+ CHECK(sender<>'user' OR state IN ('accepted','queued','applied','needs_action')),
+ CHECK(sender<>'agent' OR attempt_id IS NOT NULL)
+);
+CREATE TRIGGER message_content_immutable BEFORE UPDATE OF text,attachments_json,sender,conversation_id,seq,target_task_id ON conversation_message
+ WHEN OLD.sender='user' OR OLD.state IN ('final','interrupted')
+ BEGIN SELECT RAISE(ABORT,'immutable message content'); END;
+CREATE TABLE execution_process(
+ id TEXT PRIMARY KEY, operation_id TEXT NOT NULL REFERENCES tool_operation(id),
+ executor_ref TEXT NOT NULL, pid INTEGER, state TEXT NOT NULL CHECK(state IN ('starting','running','exited','failed','cancel_pending','cancelled','uncertain')),
+ started_at TEXT, ended_at TEXT, exit_code INTEGER, truncated_before_seq INTEGER NOT NULL DEFAULT 0,
+ revision INTEGER NOT NULL DEFAULT 1
+);
+CREATE TABLE process_log_chunk(
+ process_id TEXT NOT NULL REFERENCES execution_process(id), seq INTEGER NOT NULL CHECK(seq>0),
+ stream TEXT NOT NULL CHECK(stream IN ('stdout','stderr','system')), text TEXT NOT NULL CHECK(length(CAST(text AS BLOB))<=16384),
+ created_at TEXT NOT NULL, PRIMARY KEY(process_id,seq)
+);

@@ -1,10 +1,10 @@
 # 接口与运行契约
 
-JP-1.0｜规范传输为 typed IPC，不是公开 REST API。机器可校验格式见 [contracts.schema.json](contracts.schema.json)。文件中 Command 的每个方法都有载荷定义；Runtime 和事件定义位于 $defs。
+JP-1.1｜规范传输为 typed IPC，不是公开 REST API。机器可校验格式见 [contracts.schema.json](contracts.schema.json)。文件中 Command 的每个方法都有载荷定义；Runtime 和事件定义位于 $defs。
 
 ## 1. 通用约定
 
-Command：{schemaVersion:1, requestId:UUID, projectId:UUID|null, method, expectedRevision:int|null, payload}。服务从可信入口确定 actor，不接受客户端自报权限。create/list 类 expectedRevision=null；修改现有对象必须匹配目标 revision，例外是 operation 幂等重查。
+Command：{schemaVersion:1, requestId:UUID, projectId:UUID|null, method, expectedRevision:int|null, payload}。服务从可信入口确定 actor，不接受客户端自报权限。create/list/只读及conversation.send追加类 expectedRevision=null；修改现有对象必须匹配目标 revision，例外是 operation 幂等重查。
 
 Response：{requestId, ok, result?, error?, eventSequence}；失败 error={code,message,retryable,details?}。列表 result={items,nextCursor}；创建返回{id,revision}；耗时动作返回{operationId,state}；获取返回实体快照及revision。错误不回显密钥、原文敏感片段或内部堆栈。
 
@@ -34,6 +34,8 @@ Response：{requestId, ok, result?, error?, eventSequence}；失败 error={code,
 | data.backup/restore/export | 后台 operation 和受控输出引用 | restore 需暂停运行；export 默认排除密钥与受限原件 |
 
 所有方法必须校验 projectId 与 payload 引用所属项目一致；provider.list/save/check 和 project.list/create 可用 projectId=null。跨项目技能引用只读经显式共享授权，不通过传入其他项目 ID 越权。
+
+新增 worktype.list、conversation.list/send、execution.snapshot/logs/cancelTask 的字段、响应和权限见[扩展协议](15-conversation-and-extension.md)，已并入同一个JSON Schema，总计52个命令。work.create必须传workTypeVersion，kind按注册表核验，不再仅限三值枚举。
 
 ## 3. 核心错误码
 
@@ -72,3 +74,5 @@ execute：事务消费授权并写入 tool_operation intent、release_attempt；
 project.changed、work.changed、run.state_changed、stage.changed、task.changed、artifact.version_created、baseline.submitted、baseline.decided、baseline.invalidated、decision.changed、operation.changed、usage.updated、test.finished、issue.changed、release.changed、permission.changed。payload 至少 entityId/revision/state?，大正文通过版本 ID 读取。
 
 UI 先订阅/读取 lastSequence，再获取快照及snapshotSequence，丢弃≤snapshotSequence的事件并重放后续；避免快照与事件之间漏消息。sequence 是数据库提交顺序，不代表 LLM token 顺序。
+
+JP-1.1事件新增conversation.message_created/message_updated、execution.process_changed/log_available、worktype.changed。消息seq、进程日志seq与全局event.seq分属不同游标，不得混用。RuntimeSink的message和toolIntent经服务/工具代理转换为持久化投影，客户端不直接信任运行库输出。

@@ -9,7 +9,8 @@
       "name": "销售穿行系统",
       "kind": "system",
       "goal": "基于明确规则生成可追溯报告",
-      "mode": "checkpoint"
+      "mode": "checkpoint",
+      "workTypeVersion": "1.0.0"
     }
   },
   "response": {
