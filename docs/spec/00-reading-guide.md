@@ -21,6 +21,7 @@
 | 11 | [测试分析设计](11-test-design.md) | 测试范围、数据、故障注入和质量门槛 |
 | 12 | [研发计划与追踪矩阵](12-development-plan.md) | 可执行工作包、依赖及验收映射 |
 | 13 | [交接审阅报告](13-readiness-review.md) | 自检证据、限制与开工顺序 |
+| 附录 | [交付物内容契约](14-artifact-content-contracts.md) | 各类产物必需内容、最终审核团队与覆盖规则 |
 
 旧的 research.md、prd-draft.md、product-proposal.md 等保留为需求演变材料。当前实现以本目录 JP-1.0 为准；不合并旧稿的开放项来覆盖这里的默认决定。外部事实以来源为依据；内部接口和参数是本项目设计。
 

@@ -1,0 +1,132 @@
+JP-1.0 specification validation: PASS
+129 checks; 40 SQL tables; 46 API methods; 3 workflow DAGs; 32 local links
+Scope: document/schema validation only. No application, provider, container or production execution tests were run by this script.
+PASS SQL foreign keys enabled
+PASS At most one live workflow per work
+PASS Artifact versions reject mutation
+PASS New version may reuse immutable content object
+PASS JSON fields reject malformed JSON
+PASS Foreign keys reject missing project
+PASS Work kinds reject unknown values
+PASS Sealed baseline rejects added members
+PASS Sealed baseline rejects changed members
+PASS Sealed baseline rejects deletion in live project
+PASS Agent cannot insert user approval
+PASS One running attempt per task
+PASS Task self dependency rejected
+PASS Tool idempotency keys unique per project
+PASS Pass result requires evidence reference
+PASS No foreign key inconsistencies
+PASS Purge can remove sealed member only after project deleted
+PASS Command and response examples validate
+PASS Reject unknown payload field: project.create
+PASS Reject unknown payload field: project.list
+PASS Reject unknown payload field: project.get
+PASS Reject unknown payload field: project.archive
+PASS Reject unknown payload field: project.delete
+PASS Reject unknown payload field: work.create
+PASS Reject unknown payload field: work.get
+PASS Reject unknown payload field: work.start
+PASS Reject unknown payload field: work.control
+PASS Reject unknown payload field: provider.save
+PASS Reject unknown payload field: provider.check
+PASS Reject unknown payload field: artifact.import
+PASS Reject unknown payload field: artifact.list
+PASS Reject unknown payload field: artifact.read
+PASS Reject unknown payload field: artifact.saveDraft
+PASS Reject unknown payload field: artifact.publishVersion
+PASS Reject unknown payload field: baseline.submit
+PASS Reject unknown payload field: baseline.decide
+PASS Reject unknown payload field: decision.resolve
+PASS Reject unknown payload field: task.list
+PASS Reject unknown payload field: task.retry
+PASS Reject unknown payload field: change.preview
+PASS Reject unknown payload field: change.apply
+PASS Reject unknown payload field: skill.validate
+PASS Reject unknown payload field: skill.enable
+PASS Reject unknown payload field: skill.groupSave
+PASS Reject unknown payload field: test.run
+PASS Reject unknown payload field: test.results
+PASS Reject unknown payload field: issue.update
+PASS Reject unknown payload field: release.configure
+PASS Reject unknown payload field: release.prepare
+PASS Reject unknown payload field: release.authorize
+PASS Reject unknown payload field: release.execute
+PASS Reject unknown payload field: release.status
+PASS Reject unknown payload field: permission.set
+PASS Reject unknown payload field: events.list
+PASS Reject unknown payload field: data.backup
+PASS Reject unknown payload field: data.restore
+PASS Reject unknown payload field: data.export
+PASS Reject unknown payload field: provider.list
+PASS Reject unknown payload field: project.configure
+PASS Reject unknown payload field: artifact.create
+PASS Reject unknown payload field: skill.list
+PASS Reject unknown payload field: issue.list
+PASS Reject unknown payload field: release.targets
+PASS Reject unknown payload field: source.register
+PASS All method branches accept schema-valid examples
+PASS Unknown work kind rejected by API schema
+PASS Invalid request UUID rejected
+PASS Caller cannot add actor to envelope
+PASS system stage keys unique
+PASS system dependency progress 0
+PASS system dependency progress 1
+PASS system dependency progress 2
+PASS system dependency progress 3
+PASS system dependency progress 4
+PASS system dependency progress 5
+PASS system dependency progress 6
+PASS system dependency progress 7
+PASS system every stage has outputs and roles
+PASS skill stage keys unique
+PASS skill dependency progress 0
+PASS skill dependency progress 1
+PASS skill dependency progress 2
+PASS skill dependency progress 3
+PASS skill dependency progress 4
+PASS skill every stage has outputs and roles
+PASS document stage keys unique
+PASS document dependency progress 0
+PASS document dependency progress 1
+PASS document dependency progress 2
+PASS document dependency progress 3
+PASS document dependency progress 4
+PASS document every stage has outputs and roles
+PASS All 25 FRs covered by traceability matrix
+PASS 40 distinct test cases
+PASS Traceability test references exist
+PASS 14 UI screens represented in design board
+PASS Traceability UI references exist
+PASS Link exists 06-system-design.md -> 07-data-model.md
+PASS Link exists 06-system-design.md -> 08-api-contracts.md
+PASS Link exists 13-readiness-review.md -> validate_spec.py
+PASS Link exists 13-readiness-review.md -> validation-results.txt
+PASS Link exists 04-ux-spec.md -> 03-prd.md
+PASS Link exists 04-ux-spec.md -> ../design/screenboard.html
+PASS Link exists 04-ux-spec.md -> ../design/project-overview.png
+PASS Link exists 04-ux-spec.md -> ../design/artifact-review.png
+PASS Link exists 07-data-model.md -> schema.sql
+PASS Link exists 00-reading-guide.md -> 01-owner-decisions.md
+PASS Link exists 00-reading-guide.md -> 02-research-and-adrs.md
+PASS Link exists 00-reading-guide.md -> 03-prd.md
+PASS Link exists 00-reading-guide.md -> 04-ux-spec.md
+PASS Link exists 00-reading-guide.md -> ../design/screenboard.html
+PASS Link exists 00-reading-guide.md -> 05-team-briefing.md
+PASS Link exists 00-reading-guide.md -> 06-system-design.md
+PASS Link exists 00-reading-guide.md -> 07-data-model.md
+PASS Link exists 00-reading-guide.md -> schema.sql
+PASS Link exists 00-reading-guide.md -> 08-api-contracts.md
+PASS Link exists 00-reading-guide.md -> contracts.schema.json
+PASS Link exists 00-reading-guide.md -> 09-workflows-and-agents.md
+PASS Link exists 00-reading-guide.md -> 10-security-and-operations.md
+PASS Link exists 00-reading-guide.md -> 11-test-design.md
+PASS Link exists 00-reading-guide.md -> 12-development-plan.md
+PASS Link exists 00-reading-guide.md -> 13-readiness-review.md
+PASS Link exists 00-reading-guide.md -> 14-artifact-content-contracts.md
+PASS Link exists 02-research-and-adrs.md -> ../research.md
+PASS Link exists 03-prd.md -> ../work-scenarios.md
+PASS Link exists 03-prd.md -> 01-owner-decisions.md
+PASS Link exists 09-workflows-and-agents.md -> workflow-templates.json
+PASS Link exists 09-workflows-and-agents.md -> 14-artifact-content-contracts.md
+PASS Link exists 08-api-contracts.md -> contracts.schema.json
