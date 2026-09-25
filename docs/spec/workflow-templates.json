@@ -1,0 +1,264 @@
+{
+  "schemaVersion": 1,
+  "version": "JP-1.0",
+  "templates": {
+    "system": [
+      {
+        "key": "research",
+        "dependsOn": [],
+        "roles": [
+          "researcher",
+          "product"
+        ],
+        "requiredArtifactKinds": [
+          "research",
+          "decision_log"
+        ],
+        "gate": "checks"
+      },
+      {
+        "key": "prd",
+        "dependsOn": [
+          "research"
+        ],
+        "roles": [
+          "product"
+        ],
+        "requiredArtifactKinds": [
+          "prd"
+        ],
+        "gate": "user_or_provisional"
+      },
+      {
+        "key": "ux",
+        "dependsOn": [
+          "prd"
+        ],
+        "roles": [
+          "ux"
+        ],
+        "requiredArtifactKinds": [
+          "ux"
+        ],
+        "gate": "user_or_provisional"
+      },
+      {
+        "key": "briefing",
+        "dependsOn": [
+          "ux"
+        ],
+        "roles": [
+          "product",
+          "architect",
+          "developer",
+          "tester"
+        ],
+        "requiredArtifactKinds": [
+          "briefing"
+        ],
+        "gate": "no_blocking_issues"
+      },
+      {
+        "key": "engineering",
+        "dependsOn": [
+          "briefing"
+        ],
+        "roles": [
+          "architect",
+          "tester"
+        ],
+        "requiredArtifactKinds": [
+          "architecture",
+          "test_design"
+        ],
+        "gate": "user_required"
+      },
+      {
+        "key": "implementation",
+        "dependsOn": [
+          "engineering"
+        ],
+        "roles": [
+          "developer",
+          "tester",
+          "evaluator"
+        ],
+        "requiredArtifactKinds": [
+          "code_snapshot",
+          "test_evidence"
+        ],
+        "gate": "checks_and_no_major_issues"
+      },
+      {
+        "key": "final-review",
+        "dependsOn": [
+          "implementation"
+        ],
+        "roles": [
+          "final_reviewer"
+        ],
+        "requiredArtifactKinds": [
+          "review_report"
+        ],
+        "gate": "user_required"
+      },
+      {
+        "key": "release",
+        "dependsOn": [
+          "final-review"
+        ],
+        "roles": [
+          "release_manager"
+        ],
+        "requiredArtifactKinds": [
+          "release_manifest",
+          "test_evidence"
+        ],
+        "gate": "production_authorization_and_verification"
+      }
+    ],
+    "skill": [
+      {
+        "key": "intake",
+        "dependsOn": [],
+        "roles": [
+          "product"
+        ],
+        "requiredArtifactKinds": [
+          "decision_log"
+        ],
+        "gate": "checks"
+      },
+      {
+        "key": "research",
+        "dependsOn": [
+          "intake"
+        ],
+        "roles": [
+          "researcher"
+        ],
+        "requiredArtifactKinds": [
+          "research"
+        ],
+        "gate": "checks"
+      },
+      {
+        "key": "compose",
+        "dependsOn": [
+          "research"
+        ],
+        "roles": [
+          "developer"
+        ],
+        "requiredArtifactKinds": [
+          "skill"
+        ],
+        "gate": "checks"
+      },
+      {
+        "key": "validate",
+        "dependsOn": [
+          "compose"
+        ],
+        "roles": [
+          "tester"
+        ],
+        "requiredArtifactKinds": [
+          "test_evidence"
+        ],
+        "gate": "checks"
+      },
+      {
+        "key": "review",
+        "dependsOn": [
+          "validate"
+        ],
+        "roles": [
+          "final_reviewer"
+        ],
+        "requiredArtifactKinds": [
+          "review_report"
+        ],
+        "gate": "user_required"
+      }
+    ],
+    "document": [
+      {
+        "key": "intake",
+        "dependsOn": [],
+        "roles": [
+          "product"
+        ],
+        "requiredArtifactKinds": [
+          "decision_log"
+        ],
+        "gate": "checks"
+      },
+      {
+        "key": "outline",
+        "dependsOn": [
+          "intake"
+        ],
+        "roles": [
+          "product"
+        ],
+        "requiredArtifactKinds": [
+          "document"
+        ],
+        "gate": "user_or_provisional"
+      },
+      {
+        "key": "draft",
+        "dependsOn": [
+          "outline"
+        ],
+        "roles": [
+          "developer"
+        ],
+        "requiredArtifactKinds": [
+          "document"
+        ],
+        "gate": "checks"
+      },
+      {
+        "key": "verify",
+        "dependsOn": [
+          "draft"
+        ],
+        "roles": [
+          "tester"
+        ],
+        "requiredArtifactKinds": [
+          "review_report"
+        ],
+        "gate": "checks"
+      },
+      {
+        "key": "review",
+        "dependsOn": [
+          "verify"
+        ],
+        "roles": [
+          "final_reviewer"
+        ],
+        "requiredArtifactKinds": [
+          "document"
+        ],
+        "gate": "user_required"
+      }
+    ]
+  },
+  "limits": {
+    "globalConcurrency": 3,
+    "projectConcurrency": 2,
+    "maxTurns": 40,
+    "maxRepairsPerIssue": 3,
+    "maxNoProgressRounds": 2
+  },
+  "notes": {
+    "engineering": "architecture and test_design tasks execute in parallel; explore may emit provisional documents but cannot dispatch implementation until user accepts engineering baseline",
+    "skillGroup": "compose requires skill_group in addition to skill when work config selects group",
+    "completion": "delivered is run/work terminal state, not an additional stage",
+    "documentRoles": "developer role uses document-authoring skill/tool subset here, no exec capability unless explicitly configured"
+  }
+}

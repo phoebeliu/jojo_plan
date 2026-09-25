@@ -1,0 +1,24 @@
+{
+  "command": {
+    "schemaVersion": 1,
+    "requestId": "00000000-0000-4000-8000-000000000001",
+    "projectId": "00000000-0000-4000-8000-000000000002",
+    "method": "work.create",
+    "expectedRevision": null,
+    "payload": {
+      "name": "销售穿行系统",
+      "kind": "system",
+      "goal": "基于明确规则生成可追溯报告",
+      "mode": "checkpoint"
+    }
+  },
+  "response": {
+    "requestId": "00000000-0000-4000-8000-000000000001",
+    "ok": true,
+    "result": {
+      "id": "00000000-0000-4000-8000-000000000003",
+      "revision": 1
+    },
+    "eventSequence": 1
+  }
+}

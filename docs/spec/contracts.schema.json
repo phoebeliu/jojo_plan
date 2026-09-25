@@ -1,0 +1,2083 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Jojo Plan JP-1.0 IPC and runtime contracts",
+  "$ref": "#/$defs/Command",
+  "$defs": {
+    "Command": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "requestId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "projectId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "method": {
+          "enum": [
+            "project.create",
+            "project.list",
+            "project.get",
+            "project.archive",
+            "project.delete",
+            "work.create",
+            "work.get",
+            "work.start",
+            "work.control",
+            "provider.save",
+            "provider.check",
+            "artifact.import",
+            "artifact.list",
+            "artifact.read",
+            "artifact.saveDraft",
+            "artifact.publishVersion",
+            "baseline.submit",
+            "baseline.decide",
+            "decision.resolve",
+            "task.list",
+            "task.retry",
+            "change.preview",
+            "change.apply",
+            "skill.validate",
+            "skill.enable",
+            "skill.groupSave",
+            "test.run",
+            "test.results",
+            "issue.update",
+            "release.configure",
+            "release.prepare",
+            "release.authorize",
+            "release.execute",
+            "release.status",
+            "permission.set",
+            "events.list",
+            "data.backup",
+            "data.restore",
+            "data.export",
+            "provider.list",
+            "project.configure",
+            "artifact.create",
+            "skill.list",
+            "issue.list",
+            "release.targets",
+            "source.register"
+          ]
+        },
+        "expectedRevision": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payload": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "requestId",
+        "projectId",
+        "method",
+        "expectedRevision",
+        "payload"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "project.create"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  },
+                  "directoryToken": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "name",
+                  "directoryToken"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "project.list"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "cursor": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 200
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "project.get"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "project.archive"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "archived": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "archived"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "project.delete"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "confirmName": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "confirmName"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "work.create"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "skill",
+                      "document",
+                      "system"
+                    ]
+                  },
+                  "goal": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 20000
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "checkpoint",
+                      "explore"
+                    ]
+                  }
+                },
+                "required": [
+                  "name",
+                  "kind",
+                  "goal",
+                  "mode"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "work.get"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "workId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "workId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "work.start"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "workId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "providerId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "tokenLimit": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "materialVersionIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "uniqueItems": true
+                  },
+                  "skillVersionIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "uniqueItems": true
+                  }
+                },
+                "required": [
+                  "workId",
+                  "providerId",
+                  "tokenLimit",
+                  "materialVersionIds",
+                  "skillVersionIds"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "work.control"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "workId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "pause",
+                      "resume",
+                      "cancel"
+                    ]
+                  }
+                },
+                "required": [
+                  "workId",
+                  "action"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "provider.save"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "providerId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "model",
+                      "search",
+                      "ocr",
+                      "release"
+                    ]
+                  },
+                  "protocol": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "baseUrl": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "modelId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "secretToken": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "config": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "name",
+                  "kind",
+                  "protocol",
+                  "baseUrl",
+                  "config"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "provider.check"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "providerId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "providerId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "artifact.import"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "workId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "fileTokens": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "uniqueItems": true
+                  },
+                  "sensitivity": {
+                    "type": "string",
+                    "enum": [
+                      "public",
+                      "internal",
+                      "restricted"
+                    ]
+                  }
+                },
+                "required": [
+                  "workId",
+                  "fileTokens",
+                  "sensitivity"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "artifact.list"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "workId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "cursor": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 200
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "artifact.read"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "versionId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "offset": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "limitBytes": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 1048576
+                  }
+                },
+                "required": [
+                  "versionId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "artifact.saveDraft"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "artifactId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "baseVersionId": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "text": {
+                    "type": "string",
+                    "maxLength": 500000
+                  }
+                },
+                "required": [
+                  "artifactId",
+                  "baseVersionId",
+                  "text"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "artifact.publishVersion"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "artifactId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "draftRevision": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "summary": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "artifactId",
+                  "draftRevision",
+                  "summary"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "baseline.submit"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "stageId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "inputVersionIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "uniqueItems": true
+                  },
+                  "outputVersionIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "uniqueItems": true
+                  },
+                  "evidenceVersionIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "uniqueItems": true
+                  }
+                },
+                "required": [
+                  "stageId",
+                  "inputVersionIds",
+                  "outputVersionIds",
+                  "evidenceVersionIds"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "baseline.decide"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "baselineId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "verdict": {
+                    "type": "string",
+                    "enum": [
+                      "approve",
+                      "request_changes",
+                      "insufficient",
+                      "assume"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "baselineId",
+                  "fingerprint",
+                  "verdict",
+                  "reason"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "decision.resolve"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "decisionId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "optionKey": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "mode": {
+                    "type": "string",
+                    "enum": [
+                      "decide",
+                      "assume"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "decisionId",
+                  "optionKey",
+                  "mode",
+                  "reason"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "task.list"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "workId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "cursor": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "workId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "task.retry"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "taskId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "taskId",
+                  "reason"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "change.preview"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "workId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "fromVersionId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "toVersionId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "workId",
+                  "fromVersionId",
+                  "toVersionId",
+                  "reason"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "change.apply"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "changeId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "previewFingerprint": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "changeId",
+                  "previewFingerprint"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "skill.validate"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "skillVersionId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "suiteVersionId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "skillVersionId",
+                  "suiteVersionId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "skill.enable"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "skillVersionId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "reviewBaselineId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "skillVersionId",
+                  "reviewBaselineId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "skill.groupSave"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "members": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "nodeKey": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "skillVersionId": {
+                          "type": "string",
+                          "format": "uuid"
+                        },
+                        "dependsOnKeys": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1
+                          },
+                          "uniqueItems": true
+                        },
+                        "inputBindings": {
+                          "type": "object"
+                        }
+                      },
+                      "required": [
+                        "nodeKey",
+                        "skillVersionId",
+                        "dependsOnKeys",
+                        "inputBindings"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "groupId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "name",
+                  "members"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "test.run"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "workId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "testCaseIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "uniqueItems": true
+                  },
+                  "targetVersionIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "uniqueItems": true
+                  },
+                  "isSimulation": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "workId",
+                  "testCaseIds",
+                  "targetVersionIds",
+                  "isSimulation"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "test.results"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "testRunId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "testRunId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "issue.update"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "issueId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "open",
+                      "assigned",
+                      "fixed",
+                      "retesting",
+                      "closed",
+                      "accepted",
+                      "reopened"
+                    ]
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "evidenceResultId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "issueId",
+                  "status",
+                  "reason"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "release.configure"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "providerId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "environment": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "contract": {
+                    "type": "object"
+                  },
+                  "targetId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "providerId",
+                  "environment",
+                  "contract"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "release.prepare"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "workId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "manifestVersionId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "baselineId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "targetId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "workId",
+                  "manifestVersionId",
+                  "baselineId",
+                  "targetId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "release.authorize"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "candidateId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "fingerprint": {
+                    "type": "string",
+                    "pattern": "^[a-f0-9]{64}$"
+                  },
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "publish",
+                      "rollback"
+                    ]
+                  }
+                },
+                "required": [
+                  "candidateId",
+                  "fingerprint",
+                  "action"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "release.execute"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "candidateId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "authorizationId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "candidateId",
+                  "authorizationId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "release.status"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "candidateId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "candidateId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "permission.set"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "workId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "capability": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "scope": {
+                    "type": "object"
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "active",
+                      "revoked"
+                    ]
+                  },
+                  "grantId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                },
+                "required": [
+                  "capability",
+                  "scope",
+                  "status"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "events.list"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "afterSequence": {
+                    "type": "integer",
+                    "minimum": 0
+                  },
+                  "limit": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 200
+                  }
+                },
+                "required": [
+                  "afterSequence"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "data.backup"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "directoryToken": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "directoryToken"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "data.restore"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "fileToken": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "fileToken"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "data.export"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "workId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "format": {
+                    "type": "string",
+                    "enum": [
+                      "md",
+                      "html",
+                      "pdf",
+                      "docx",
+                      "zip"
+                    ]
+                  },
+                  "directoryToken": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "includeRestricted": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "format",
+                  "directoryToken",
+                  "includeRestricted"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "provider.list"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "project.configure"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "policy": {
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "policy"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "artifact.create"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "workId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "sensitivity": {
+                    "type": "string",
+                    "enum": [
+                      "public",
+                      "internal",
+                      "restricted"
+                    ]
+                  }
+                },
+                "required": [
+                  "workId",
+                  "kind",
+                  "title",
+                  "sensitivity"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "skill.list"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "cursor": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "issue.list"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "workId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "cursor": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "workId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "release.targets"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "method": {
+                "const": "source.register"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "workId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "url": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "title": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "workId",
+                  "url",
+                  "title"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    "Response": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "requestId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "ok": {
+              "const": true
+            },
+            "result": {
+              "type": "object"
+            },
+            "eventSequence": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "requestId",
+            "ok",
+            "result",
+            "eventSequence"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "requestId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "message": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "retryable": {
+                  "type": "boolean"
+                },
+                "details": {
+                  "type": "object"
+                }
+              },
+              "required": [
+                "code",
+                "message",
+                "retryable"
+              ],
+              "additionalProperties": false
+            },
+            "eventSequence": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "requestId",
+            "ok",
+            "error",
+            "eventSequence"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "RoleRunSpec": {
+      "type": "object",
+      "properties": {
+        "taskId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "attemptId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1
+        },
+        "objective": {
+          "type": "string",
+          "minLength": 1
+        },
+        "inputBaselineId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inputFingerprint": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "inputVersionIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uniqueItems": true
+        },
+        "skillVersionIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uniqueItems": true
+        },
+        "modelConfigRef": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "modelConfigRevision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "allowedTools": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "maxTurns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "maxOutputTokens": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "workspaceRef": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "taskId",
+        "attemptId",
+        "role",
+        "objective",
+        "inputBaselineId",
+        "inputFingerprint",
+        "inputVersionIds",
+        "skillVersionIds",
+        "modelConfigRef",
+        "modelConfigRevision",
+        "allowedTools",
+        "maxTurns",
+        "maxOutputTokens",
+        "workspaceRef"
+      ],
+      "additionalProperties": false
+    },
+    "ToolIntent": {
+      "type": "object",
+      "properties": {
+        "attemptId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "operationId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "parameters": {
+          "type": "object"
+        },
+        "idempotencyKey": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "attemptId",
+        "operationId",
+        "name",
+        "parameters",
+        "idempotencyKey"
+      ],
+      "additionalProperties": false
+    },
+    "ArtifactProposal": {
+      "type": "object",
+      "properties": {
+        "taskId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "contentObjectHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "inputVersionIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uniqueItems": true
+        },
+        "sourceSpanIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "uniqueItems": true
+        },
+        "evidenceKind": {
+          "type": "string",
+          "enum": [
+            "user_provided",
+            "retrieved",
+            "inferred",
+            "measured",
+            "synthetic"
+          ]
+        }
+      },
+      "required": [
+        "taskId",
+        "kind",
+        "title",
+        "contentObjectHash",
+        "inputVersionIds",
+        "sourceSpanIds",
+        "evidenceKind"
+      ],
+      "additionalProperties": false
+    },
+    "DomainEvent": {
+      "type": "object",
+      "properties": {
+        "seq": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "projectId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "workId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "payload": {
+          "type": "object"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "seq",
+        "projectId",
+        "workId",
+        "type",
+        "payload",
+        "createdAt"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
