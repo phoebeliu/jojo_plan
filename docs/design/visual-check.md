@@ -7,3 +7,5 @@ JP-1.1｜2026-09-25。检查对象screenboard.html是静态交互设计稿，所
 截图：[主对话](conversation-workspace.png)、[Agent与进程](agent-inspector.png)、[成果阅读](artifact-review.png)、[PPT扩展](ppt-extension.png)。主对话、Agent与PPT截图已逐张查看，文字、内容层级和主操作可读。旧14页设计稿不再作为当前界面依据。
 
 未验证真实模型/进程、后台消息投递、完整焦点管理、200%缩放或安装。右侧覆盖面板的正式焦点约束需按T-48实现验收；静态稿展示结构不代表应用已开发。
+
+本轮追加：常驻执行栏显示当前工作的智能体和后台Job数量，后台Job入口可打开sample-validator示例日志；已随原浏览器检查重新运行。截图见[后台Jobs](background-jobs.png)。

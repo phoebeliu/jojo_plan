@@ -136,6 +136,8 @@ CREATE TABLE permission_grant(
 );
 CREATE TABLE tool_operation(
  id TEXT PRIMARY KEY, attempt_id TEXT REFERENCES run_attempt(id), project_id TEXT NOT NULL REFERENCES project(id),
+ work_id TEXT REFERENCES work_item(id),
+ execution_mode TEXT NOT NULL DEFAULT 'foreground' CHECK(execution_mode IN ('foreground','background')),
  tool TEXT NOT NULL, idempotency_key TEXT NOT NULL, request_hash TEXT NOT NULL,
  state TEXT NOT NULL CHECK(state IN ('intent','running','succeeded','failed','uncertain','cancelled')),
  effect_class TEXT NOT NULL CHECK(effect_class IN ('read','write','exec','external')),

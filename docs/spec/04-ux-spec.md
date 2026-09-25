@@ -103,3 +103,13 @@ Cmd+N新工作；Cmd+Enter发送；Enter默认换行，输入法组合期间禁�
 ## 项目层级澄清（用户确认）
 
 审计项目与护照校验项目为同级项目。审计项目下可有销售穿行、IPO 审计等工作；护照校验系统的工作属于独立的护照校验项目，不放在审计项目下。项目是业务归属，工作类型（制作 Skill、写文档、开发系统等）是执行方式，两者不能混为同一分类。IPO 审计在本稿仅作为归属示例，具体范围与交付要求尚未定义。
+
+## 工作区常驻执行栏（用户补充）
+
+对话上方常驻显示“当前工作 · N个智能体工作中 · M个后台Job”，不随聊天滚动消失。数字按钮可分别打开Agent树和后台Job列表；旁边显示活跃角色摘要、排队或待核实提示。切换工作后只统计当前workId，不混入其他项目；0显示0，状态尚未加载/断连显示“同步中/数据截至时间”，不能用0冒充未知。
+
+智能体数按当前工作有效running attempt去重，等待工具结果的活跃attempt仍计入；纯等待子任务事件的协调器、排队任务和历史尝试不计。后台Job是持久化工具操作的后台执行单元，例如容器校验、导入解析、导出或发布；同一个operationId及其子进程只计一次，模型流式回答不计Job。M为已派发且尚未终结的后台操作数；排队、待核实单独显示，不与运行中相加。智能体和Job分别统计，不能相加当作工作总数。
+
+execution.snapshot结果增加activitySummary={activeAgentCount,runningJobCount,queuedJobCount,uncertainJobCount,asOfSequence,observedAt}及jobs数组，来源与树使用同一快照。后台操作必须记录executionMode=background及workId（持久化为tool_operation.execution_mode和work_id；服务验证work与project及attempt归属一致），不能由前端看名称猜测；列表将操作intent显示为queued，其余映射为running/uncertain/succeeded/failed/cancelled；数据库沿用intent状态。Job详情显示operationId、所属Agent/attempt（系统任务可为空）、名称、状态、开始时间、最后活动、执行器、进程引用、结果/日志引用。历史分页复用执行快照游标；终态从活跃计数移除但保留记录。收到operation/process/attempt事件后更新同一投影；重连先核对再显示状态。
+
+W-19/T-43追加验收：长对话滚动仍可见执行栏；两个Agent共享一个后台操作只计一个Job；一个Job有多个进程不重复计数；失败/退出/断线恢复后计数与列表一致；其他项目任务不混入；空闲协调者不虚增活跃数量。设计稿“2个智能体、1个Job”为演示数据。
