@@ -146,3 +146,7 @@ sequenceDiagram
 ```
 
 具体字段、取消分支、限额和恢复见[扩展协议](15-conversation-and-extension.md)。消息状态applied与输入快照在派发前同事务落盘；若派发失败，attempt标失败/待核对，UI同时显示，不把applied解释为已成功执行。
+
+## S1补充（2026-10-02）
+
+[S1交付闭环](16-delivery-contract.md)复用现有领域服务，不创建第二套完成状态。metadata只保存标准和引用，状态来自可信检查、baseline与approval；模型无权写通过。

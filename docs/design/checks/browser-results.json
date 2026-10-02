@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-02T01:53:19.989Z",
+  "date": "2026-10-02T10:42:54.121Z",
   "scope": "Static design only; no runtime/LLM/production tests",
   "results": [
     {
@@ -44,6 +44,10 @@
     },
     {
       "name": "Settings explain limitations without requesting credentials",
+      "pass": true
+    },
+    {
+      "name": "Delivery change invalidates evidence without fabricating a pass",
       "pass": true
     },
     {

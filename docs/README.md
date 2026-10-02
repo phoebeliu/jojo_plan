@@ -1,6 +1,6 @@
 # jojo plan · 替身计划：文档总览
 
-更新日期：2026-09-25。用户已授权按建议继续推演至可开发文档；当前已形成 **JP-1.1 开发交接包**。
+更新日期：2026-10-02。用户已授权按建议继续推演至可开发文档；当前已形成 **JP-1.1 开发交接包**。
 
 优先阅读：[开发交接包目录](spec/00-reading-guide.md)、[待用户拍板](spec/01-owner-decisions.md)、[交接审阅报告](spec/13-readiness-review.md)。设计稿见 [UI/UX 界面板](design/screenboard.html)。
 
@@ -19,3 +19,5 @@
 工作区另有空的嵌套 Git 仓库 jojo_plan/；本轮沿用根仓库存放成果，没有调整或提交该嵌套仓库。
 
 本轮修订：前六项决定已确认；统一任务对话、可展开的Agent/进程详情、工作包扩展。写PPT已定义后续接入方式，未承诺首版生成能力。
+
+最新 S1：[产品定位与竞争研究](strategy/00-readme.md)、[用户与市场材料](strategy/04-audience-and-launch.md)、[投资人备忘录](strategy/03-business-and-moat.md)、[交付闭环补充规格](spec/16-delivery-contract.md)。既有JP-1.1与S1配套阅读，旧稿不能覆盖新决定。

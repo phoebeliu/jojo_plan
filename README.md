@@ -1,6 +1,6 @@
 # jojo plan · 替身计划
 
-面向 AI 工程师的 macOS 工作台：以对话组织 Agent 工作，加载技能并完成研究、文档与系统交付。
+面向 AI 项目负责人的可验收交付工作台：把模糊要求变成交付约定，在需求变化后找出需要重做和重验的成果。效率优势仍待真实任务验证。
 
 当前成果是 **JP-1.1 开发交接文档包**，不是已实现的应用。
 
@@ -17,3 +17,5 @@
 本轮修订：前六项决定已确认；统一任务对话、可展开的Agent/进程详情、工作包扩展。写PPT已定义后续接入方式，未承诺首版生成能力。
 
 2026-10-02：交互设计升级为 **Design Edition 02**，包含统一视觉体系、常驻执行栏、角色协作卡、快捷搜索和可操作演示。参阅[品质审阅与检查记录](docs/design/quality-review.md)。
+
+战略修订 S1：[为什么值得存在](docs/strategy/00-readme.md) · [竞品研究](docs/strategy/01-competitive-research.md) · [投资人备忘录](docs/strategy/03-business-and-moat.md) · [用户与推广材料](docs/strategy/04-audience-and-launch.md)。当前为设计阶段，没有已验证护城河。

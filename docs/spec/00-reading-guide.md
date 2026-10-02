@@ -31,3 +31,7 @@
 JP-1.1 重点先看 [新交互设计](04-ux-spec.md) 与 [扩展协议](15-conversation-and-extension.md)。原14页改为统一对话主线与按需详情；开发团队以本版界面ID和52个命令为准。JP-1.0压缩包保留作历史，不能混用两版契约。
 
 2026-10-02更新：[Design Edition 02品质审阅](../design/quality-review.md)记录视觉重构、交互自检及获奖品质目标。工作区入口仍为同一个screenboard.html；配套CSS/JS需一起保留。
+
+## S1补充（2026-10-02）
+
+定位与设计增加 S1 补充：[战略阅读入口](../strategy/00-readme.md)与[交付闭环规格](16-delivery-contract.md)。与JP-1.1共同阅读，接口数量和运行底座不变。

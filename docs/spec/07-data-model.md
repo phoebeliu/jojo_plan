@@ -101,3 +101,7 @@ release_target.contract_json：triggerUrl、statusUrlTemplate、rollbackUrl?、a
 ## JP-1.1 新增实体
 
 work_type_version锁定工作包内容，允许改变启用状态；conversation每工作唯一；conversation_message按会话seq排序并记录实际应用attempt，原用户消息不可改写；execution_process关联工具操作；process_log_chunk按进程序号读取且仅存脱敏文本。task新增parent_task_id用于层级，依赖仍在task_dependency。完整行为与试验库迁移见[扩展协议](15-conversation-and-extension.md)。work.create同事务创建工作与空主对话；首次消息通过conversation.send追加。
+
+## S1补充（2026-10-02）
+
+[S1交付约定](16-delivery-contract.md)保存在artifact_version.metadata_json.deliveryContract；关系复用artifact_link，版本与指纹仍是唯一判定依据。SQL不加表，应用层必须按内容契约验证字段、同项目引用和正文一致性；通用JSON合法不够。

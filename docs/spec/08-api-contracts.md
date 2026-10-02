@@ -76,3 +76,7 @@ project.changed、work.changed、run.state_changed、stage.changed、task.change
 UI 先订阅/读取 lastSequence，再获取快照及snapshotSequence，丢弃≤snapshotSequence的事件并重放后续；避免快照与事件之间漏消息。sequence 是数据库提交顺序，不代表 LLM token 顺序。
 
 JP-1.1事件新增conversation.message_created/message_updated、execution.process_changed/log_available、worktype.changed。消息seq、进程日志seq与全局event.seq分属不同游标，不得混用。RuntimeSink的message和toolIntent经服务/工具代理转换为持久化投影，客户端不直接信任运行库输出。
+
+## S1补充（2026-10-02）
+
+[S1内容约束](16-delivery-contract.md)适用于artifact.saveDraft/publishVersion/read、change.preview/apply与data.export既有命令。不得用新增UI中的模拟状态当作RPC返回；预演指纹过期仍按原错误处理。无新方法，无外部Agent双向同步协议。

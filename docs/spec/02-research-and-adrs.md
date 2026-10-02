@@ -74,3 +74,7 @@ P0 必须验证 Pi 自定义工具/取消、macOS 打包、数据库重启恢复
 - [R10 Electron Security](https://www.electronjs.org/docs/latest/tutorial/security)
 - [R11 Electron safeStorage](https://www.electronjs.org/docs/latest/api/safe-storage)
 - [R12 Tavily Search API](https://docs.tavily.com/documentation/api-reference/endpoint/search)
+
+## S1补充（2026-10-02）
+
+[最新官方研究](../strategy/01-competitive-research.md)覆盖Hermes、DSH、Codex、Claude Code及BMAD/Spec Kit/Jama。桌面、技能、多代理、规格流程及追溯均非独家发明。保留Pi首adapter，不承诺竞品原生集成。旧调研为当时观察，当前能力比较以本次带日期来源为准。
