@@ -1,0 +1,198 @@
+'use strict';
+// Local, deterministic interaction demo. No model, network, or job execution.
+const scenarios = {
+  "system": {
+    "title": "销售穿行系统",
+    "sub": "审计项目 / 开发系统",
+    "type": "开发系统",
+    "state": "工程设计中",
+    "user": "把这些杂乱的销售文档整理成可追溯的勾稽链条。需要解析文档、输出校验规则，并给出符合哪些审计标准的报告。",
+    "reply": "PRD 与界面方案已确认。现在让架构师和测试 Agent 同步做工程设计：先把证据、规则和报告之间的关系定义清楚，再进入研发。",
+    "plan": "工程设计",
+    "steps": "研究 / PRD　✓　UI/UX　✓　宣讲　✓　<b>工程设计</b>　→　研发测试　→　验收发布",
+    "run": "2 个 Agent 正在执行 · 1 个等待依赖",
+    "activity": "架构师正在定义证据链数据模型；测试 Agent 正在整理异常样例。",
+    "a": "系统分析设计",
+    "b": "测试分析设计"
+  },
+  "ipo": {
+    "title": "IPO 审计",
+    "sub": "审计项目 / 开发系统",
+    "type": "开发系统",
+    "state": "待梳理需求",
+    "user": "在审计项目中开展 IPO 审计相关工作。",
+    "reply": "先明确此次工作的目标、适用范围和交付物，再选择需要加载的流程和技能。当前仅展示项目归属，不预设具体审计要求。",
+    "plan": "需求梳理",
+    "steps": "<b>明确目标与范围</b>　→　确定交付物　→　制定计划",
+    "run": "尚未启动 · 当前没有活跃 Agent",
+    "activity": "IPO 审计与销售穿行属于同一个审计项目，各自保留工作对话和成果。",
+    "a": "需求范围 · 待整理",
+    "b": "交付清单 · 待明确"
+  },
+  "passport": {
+    "title": "护照校验系统",
+    "sub": "护照校验项目 / 开发系统",
+    "type": "开发系统",
+    "state": "等待范围确认",
+    "user": "客户会传来一张带人脸的护照页图片，需要判断它是不是假的。",
+    "reply": "我会先研究单张图片能支持哪些判断。图片篡改风险、版式异常和证件真伪不是同一个结论，先明确输出边界，再让团队设计系统。",
+    "plan": "研究与需求范围",
+    "steps": "<b>研究 / PRD</b>　→　UI/UX　→　工程设计　→　研发测试",
+    "run": "待你确认 · 当前没有活跃 Agent",
+    "activity": "建议输出可疑点与证据不足状态；正式范围需在 PRD 审阅卡确认。",
+    "a": "能力范围研究",
+    "b": "待确认问题"
+  },
+  "skill": {
+    "title": "Ontology 技能组",
+    "sub": "知识与分享 / 制作 Skill",
+    "type": "制作 Skill",
+    "state": "待审阅",
+    "user": "把从模糊需求开展 ontology 分析的方法做成一组可复用技能。",
+    "reply": "8 个技能的草稿已整理成一个版本化技能组。每个技能说明输入、输出和适用范围；下一步审阅组内依赖与验证结果。",
+    "plan": "技能组审阅",
+    "steps": "需求　✓　调研　✓　编写　✓　验证　→　<b>审阅</b>",
+    "run": "无活跃 Agent · 等待技能组审阅",
+    "activity": "这里的数量和状态仅演示界面，不表示真实技能已经生成或验证。",
+    "a": "Ontology 技能组",
+    "b": "技能验证报告"
+  },
+  "document": {
+    "title": "小白 CI/CD 经验分享",
+    "sub": "知识与分享 / 写文档",
+    "type": "写文档",
+    "state": "正文修订中",
+    "user": "整理一份小白也能看懂的 CI/CD 经验分享，讲清楚我遇到的问题和解决办法。",
+    "reply": "我会保留你提供的真实经历，把流水线概念放在具体例子里解释。写作 Agent 正在调整内容，缺少原始经历的部分会标为待补充。",
+    "plan": "正文与来源核查",
+    "steps": "需求　✓　大纲　✓　<b>正文修订</b>　→　核查　→　审阅",
+    "run": "1 个 Agent 正在执行",
+    "activity": "写作 Agent：将部署失败案例改写为步骤和排查清单。",
+    "a": "经验分享 · 草稿",
+    "b": "来源与待补充项"
+  },
+  "presentation": {
+    "title": "把经验分享做成 PPT",
+    "sub": "扩展示例 / 规划中的工作包",
+    "type": "写 PPT · 规划中",
+    "state": "尚不可启动",
+    "user": "把这份 CI/CD 经验分享做成面向新人培训的 PPT，保留可编辑版本和讲稿。",
+    "reply": "这是一种新的工作类型，仍使用这条对话、执行详情和成果预览。接入 PPTX 生成与渲染能力后，替身才能按下面的流程工作；当前仅展示扩展方案。",
+    "plan": "拟议 PPT 工作流程",
+    "steps": "需求　→　故事线　→　逐页内容　→　排版渲染　→　审阅",
+    "run": "缺少 2 项能力 · 没有真实执行",
+    "activity": "需要接入 pptx.generate 与 pptx.render，并通过可编辑性和页面渲染检查。",
+    "a": "故事线 · 示例",
+    "b": "页面预览 · 示例"
+  }
+};
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const icon = name => `<svg aria-hidden="true"><use href="#i-${name}"/></svg>`;
+const groups = [{name:'审计项目',keys:['system','ipo']},{name:'护照校验项目',keys:['passport']},{name:'知识与分享',keys:['skill','document']},{name:'扩展示例',keys:['presentation']}];
+const meta = {
+ system:{project:'审计项目',tagline:'让每一条审计结论，都有据可循。',english:'SYSTEM DEVELOPMENT',number:'01',short:'工程设计 · 2 个智能体',count:2,jobs:1,phase:3,stages:['研究 / PRD','UI / UX','团队宣讲','工程设计','研发测试','验收发布'],files:['产品需求规格 v3.md','交互设计方案 v2.html','合成销售单据样本.csv']},
+ ipo:{project:'审计项目',tagline:'从业务范围开始，建立清晰的审计路径。',english:'SYSTEM DEVELOPMENT',number:'02',short:'待梳理需求',count:0,jobs:0,phase:0,stages:['明确范围','确定交付','制定计划'],files:[]},
+ passport:{project:'护照校验项目',tagline:'先明确可信边界，再设计校验系统。',english:'SYSTEM DEVELOPMENT',number:'03',short:'需要你确认范围',count:0,jobs:0,phase:0,stages:['研究 / PRD','UI / UX','工程设计','研发测试'],files:['需求说明.md']},
+ skill:{project:'知识与分享',tagline:'把一次研究，沉淀为可重复使用的能力。',english:'SKILL AUTHORING',number:'04',short:'8 个技能草稿 · 待审阅',count:0,jobs:0,phase:4,stages:['明确需求','资料研究','编写技能','验证','审阅'],files:['Ontology 研究笔记.md','技能依赖草案.md']},
+ document:{project:'知识与分享',tagline:'让真实的经验，成为别人可以走通的路。',english:'DOCUMENT WRITING',number:'05',short:'正文修订中',count:1,jobs:0,phase:2,stages:['明确需求','内容大纲','正文修订','证据核查','审阅'],files:['CI-CD 经验笔记.md']},
+ presentation:{project:'扩展示例',tagline:'新的工作类型，同一个与你协作的替身。',english:'PRESENTATION · COMING LATER',number:'06',short:'规划中 · 不可启动',count:0,jobs:0,phase:0,stages:['需求','故事线','逐页内容','排版渲染','审阅'],files:['CI-CD 经验分享.md']}
+};
+scenarios.system.reply='PRD 与界面方案已确认。我正在组织工程设计：架构师梳理证据链，测试 Agent 同步设计异常样例。等两份设计对齐，再交给开发。';
+scenarios.system.activity='接下来：对齐架构与测试设计，提交工程基线审阅。';
+let current='system',screen=null,selectedAgent='architect',panel=null,lastTrigger=null,newType='system',slideIndex=0;
+const state={};
+for(const k of Object.keys(scenarios)) state[k]={draft:'',messages:[],paused:false,target:null,scroll:null};
+let toastTimer, paletteIndex=0;
+function toast(text){clearTimeout(toastTimer);$('#toast').textContent=text;$('#toast').classList.add('visible');toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),4000);}
+function nav(){
+ $('#project-nav').innerHTML=groups.map((g,i)=>`<div class="project-group"><button class="project-label" data-group="${i}" aria-expanded="true">${icon('folder')}${esc(g.name)}<svg class="fold" aria-hidden="true"><use href="#i-chevron"/></svg></button><div id="group-${i}">${g.keys.map(k=>`<button class="tasknav ${current===k&&screen==='UI-02'?'active':''}" data-task="${k}" data-short="${esc(({system:"销",ipo:"IPO",passport:"护",skill:"S",document:"文",presentation:"P"})[k]||"新")}" title="${esc(scenarios[k].title)}" aria-label="${esc(g.name+'：'+scenarios[k].title)}" ${current===k&&screen==='UI-02'?'aria-current="page"':''}><span class="task-symbol" aria-hidden="true"></span><span><strong>${esc(scenarios[k].title)}</strong><small>${esc(meta[k].short)}</small></span></button>`).join('')}</div></div>`).join('');
+}
+function saveDraft(){if(screen==='UI-02'){state[current].draft=$('#input').value;state[current].scroll=$('#timeline').scrollTop;}}
+function closePanel(restore=true){
+ const el=$('#UI-03');if(el.hidden)return;
+ el.hidden=true;el.classList.remove('wide');panel=null;$('.conversation').inert=false;el.removeAttribute('role');el.removeAttribute('aria-modal');
+ $$('#activitybar button').forEach(b=>b.setAttribute('aria-expanded','false'));
+ if(restore&&lastTrigger){const replacement=lastTrigger.isConnected?lastTrigger:lastTrigger.dataset.inspect?document.querySelector(`[data-inspect="${lastTrigger.dataset.inspect}"]`):null;replacement?.focus();}
+}
+function setScreen(id){saveDraft();closePanel(false);screen=id;['UI-01','UI-02','UI-04','UI-05'].forEach(x=>$('#'+x).hidden=x!==id);if(id!=='UI-02')$('#breadcrumb').textContent={ 'UI-01':'个人工作区 / 新工作','UI-04':'个人工作区 / 能力库','UI-05':'个人工作区 / 设置'}[id];nav();}
+function activity(){const m=meta[current],st=state[current],a=st.paused?0:m.count,j=st.paused?0:m.jobs;
+ $('#activitybar').innerHTML=`<span class="scope">当前工作</span><button data-inspect="execution" aria-expanded="${panel==='execution'}" aria-controls="UI-03">${icon('agent')}<b>${a}</b> 个智能体工作中</button><button data-inspect="jobs" aria-expanded="${panel==='jobs'}" aria-controls="UI-03">${icon('terminal')}<b>${j}</b> 个后台 Job</button><span class="health"><i class="status-dot" style="${a?'':'background:#9a8ca9'}"></i>${st.paused?'已暂停 · 演示':a?'当前阶段进行中':'等待下一步'}</span>`;
+ $('#pause').disabled=!m.count;$('#pause').innerHTML=icon(st.paused?'play':'pause')+`<span>${st.paused?'继续':'暂停'}</span>`;$('#pause').setAttribute('aria-label',st.paused?'继续演示':'暂停演示');
+ $('#send').disabled=current==='presentation'||!$('#input').value.trim();
+ $('#input-status').textContent=current==='presentation'?'规划中的工作包 · 暂不可运行':st.paused?'演示已暂停 · 补充将保留在队列':'补充将在下一个安全边界应用';
+}
+function stageCard(){const d=scenarios[current],m=meta[current];return `<section class="stage-card" aria-label="工作阶段"><div class="stage-card-head"><div class="stage-title"><span class="stage-number">${String(m.phase+1).padStart(2,'0')}</span><div><strong>${esc(d.plan)}</strong><small>${esc(state[current].paused?'已暂停 · 演示':d.state)}</small></div></div><button class="text-button" data-inspect="plan">完整计划 ${icon('chevron')}</button></div><div class="step-track">${m.stages.map((t,i)=>`<div class="step ${i<m.phase?'done':i===m.phase?'active':''}" ${i===m.phase?'aria-current="step"':''}><i aria-hidden="true"></i>${esc(t)}</div>`).join('')}</div></section>`;}
+function relay(){if(current!=='system')return '';const paused=state[current].paused;return `<section class="team-relay" aria-label="协作中的智能体"><div class="relay-label"><span>替身协作 / 工程设计</span><strong>${paused?'已暂停':'架构与测试同步推进'}</strong></div><div class="relay-people"><button class="person" data-agent="architect"><span class="person-initial">A</span><span><strong>架构师</strong><small>${paused?'已暂停':'定义证据链模型'}</small></span></button><button class="person tester" data-agent="tester"><span class="person-initial">T</span><span><strong>测试 Agent</strong><small>${paused?'已暂停':'整理异常样例'}</small></span></button><span class="relay-arrow" aria-hidden="true">→</span><button class="person pending" data-agent="developer"><span class="person-initial">D</span><span><strong>开发 Agent</strong><small>等待工程基线</small></span></button></div></section>`;}
+function artifacts(){const d=scenarios[current];return `<div class="artifact-heading"><span>这一步的成果</span><span>草稿 · 示例内容</span></div><div class="artifact-grid">${[d.a,d.b].map((t,i)=>`<button class="artifact-card" data-inspect="${i?'secondary':'artifact'}"><div class="artifact-art ${i?'test':''}" aria-hidden="true">${i?'<div class="check-lines"><i></i><i></i><i></i></div>':'<span class="diagram-node"></span><span class="diagram-line"></span><span class="diagram-node"></span><span class="diagram-line"></span><span class="diagram-node"></span>'}<span class="document-stamp">${i?'VERIFY':'DESIGN'}</span></div><div class="artifact-info"><strong>${esc(t)}${icon('arrow')}</strong><p><span>${i?'检查与依据':'内容与版本'}</span><span>打开阅读</span></p></div></button>`).join('')}</div>`;}
+function renderTimeline(){const d=scenarios[current];$('#timeline').innerHTML=`<div class="date-divider">当前工作 · 交互演示</div><article class="message-row"><div class="avatar" aria-hidden="true">你</div><div class="message-body"><div class="message-meta"><strong>你</strong><span>工作目标</span></div><p class="message-text user-text">${esc(d.user)}</p></div></article><article class="message-row"><div class="avatar jojo" aria-hidden="true"></div><div class="message-body"><div class="message-meta"><strong>Jojo</strong><span>主协调 Agent</span></div><p class="message-text assistant-intro">${esc(d.reply)}</p>${stageCard()}${relay()}${current==='presentation'?'<div class="notice">需要接入 PPTX 生成与渲染能力。当前可查看扩展设计，不能启动生成。</div>':''}${artifacts()}<div class="activity-note">${icon('link')}<span>${esc(d.activity)}</span></div></div></article>${state[current].messages.map(message=>`<article class="message-row"><div class="avatar" aria-hidden="true">你</div><div class="message-body"><div class="message-meta"><strong>你</strong><span>${esc(message.target?'给'+message.target+'的补充':'补充要求')}</span></div><p class="message-text user-text">${esc(message.text)}</p><p class="delivery-status">演示草稿已保留 · 未发送至模型</p></div></article>`).join('')}`;}
+function targetChip(){const target=state[current].target;$('#target-chip').innerHTML=target?`<span class="target-pill">定向补充：${esc(target)}<button data-action="clear-target" aria-label="取消定向补充">${icon('close')}</button></span>`:'';}
+function task(key){if(!scenarios[key])return;saveDraft();setScreen('UI-02');current=key;selectedAgent=key==='document'?'writer':'architect';nav();const m=meta[key],d=scenarios[key];$('#breadcrumb').innerHTML=`${esc(m.project)}<span>/</span><strong>${esc(d.title)}</strong>`;$('#worktitle').innerHTML=esc(d.title)+'<span class="title-dot">.</span>';$('#worksubtitle').textContent=m.tagline;$('#work-kicker').innerHTML=`${esc(m.english)} <span>／ ${esc(m.number)}</span>`;$('#material-count').textContent=m.files.length;$('#input').value=state[key].draft;$('#input').disabled=key==='presentation';renderTimeline();activity();targetChip();$('#timeline').scrollTop=state[key].scroll??$('#timeline').scrollHeight;document.title=d.title+' · jojo plan';}
+const agentNames={coordinator:'主协调 Agent',architect:'架构师',tester:'测试 Agent',developer:'开发 Agent',writer:'写作 Agent'};
+function consoleBlock(title,lines){return `<div class="console"><div class="console-top">${icon('terminal')}${esc(title)}<span style="margin-left:auto">示例</span></div><pre>${esc(lines)}</pre></div>`;}
+function agentsPanel(){const paused=state[current].paused;
+ if(current==='system')return `<div class="inspector-eyebrow">${paused?'演示已暂停':'2 个智能体执行中'} · 1 个等待依赖</div><div class="agent-tree">${['coordinator','architect','tester','developer'].map((a,i)=>`<button data-agent="${a}" class="${i?'branch':''}" aria-pressed="${selectedAgent===a}">${icon(a==='developer'?'code':'agent')}<span><strong>${agentNames[a]}</strong><small>${a==='coordinator'?'等待子任务成果':a==='developer'?'排队 · 等待工程基线':paused?'已暂停':a==='architect'?'运行中 · 证据链数据模型':'运行中 · 异常样例校验'}</small></span></button>`).join('')}</div>${agentDetail(selectedAgent)}`;
+ if(current==='document')return `<div class="inspector-eyebrow">${paused?'演示已暂停':'1 个智能体执行中'}</div><div class="agent-tree"><button data-agent="writer" aria-pressed="true">${icon('agent')}<span><strong>写作 Agent</strong><small>${paused?'已暂停':'修订正文和步骤说明'}</small></span></button></div>${agentDetail('writer')}`;
+ return `<div class="empty-state">${icon('agent')}<h3>当前没有智能体在执行</h3><p>${esc(scenarios[current].state)}。确认下一步后，执行详情将在这里出现。</p></div><p class="note">已完成的角色记录将进入历史，不计入当前工作数量。</p>`;
+}
+function agentDetail(a){const details={
+ architect:['梳理单据、证据链、规则和报告之间的数据关系。','模型配置 A · v2','system-core@1.0.0','read_artifact  prd-v3       完成\nread_artifact  ux-v2        完成\nwrite_draft    data-model   完成\n\n等待模型返回下一段设计说明'],
+ tester:['用合成单据验证异常样例格式；这里不是应用测试结果。','模型配置 B · v1','system-core@1.0.0','[sample-validator]\nloaded 12 synthetic examples\nchecking required fields…\n\nexit code: —'],
+ developer:['工程基线尚未确认。模型和工具均未启动。','尚未启动','system-core@1.0.0','等待架构与测试设计通过\n尚无工具调用或后台进程'],
+ coordinator:['汇总子任务成果、处理你的补充，并检查阶段出口。','模型配置 A · v2','system-core@1.0.0','等待子任务事件\n当前没有持续模型调用'],
+ writer:['把部署失败案例拆成可理解的步骤，保留真实经历的来源。','模型配置 A · v2','document-core@1.0.0','read_artifact  experience-notes  完成\nwrite_draft    cicd-guide        进行中']
+ }[a];return `<h3 class="detail-heading">${agentNames[a]}</h3><p class="detail-description">${details[0]}</p><dl class="detail-kv"><dt>输入依据</dt><dd>${current==='document'?'经验笔记 · 内容大纲':'PRD v3 · UI/UX v2'}</dd><dt>模型</dt><dd>${details[1]}</dd><dt>已加载技能</dt><dd>${details[2]}</dd><dt>当前状态</dt><dd>${state[current].paused?'演示已暂停':a==='developer'?'等待依赖':a==='coordinator'?'等待事件':'运行中 · 示例'}</dd></dl>${consoleBlock('执行记录',state[current].paused?'演示已暂停，未连接真实执行器。':details[3])}<button class="detail-action" data-target="${a}">${icon('plus')}给这个任务补充要求</button><p class="note">展示操作与结果摘要，不展示模型隐藏推理。</p>`;}
+function jobsPanel(){const paused=state[current].paused,j=meta[current].jobs;return `<div class="count-grid"><div><b>${paused?0:j}</b><small>运行中</small></div><div><b>${paused?j:0}</b><small>${paused?'已暂停':'排队中'}</small></div><div><b>0</b><small>待核实</small></div></div>${j?`<div class="job-card"><span class="badge ${paused?'amber':'green'}">${paused?'已暂停':'运行中'} · 演示</span><h3>合成样例格式校验</h3><p class="detail-description">测试 Agent 正在核对必填字段与数据格式。</p><dl class="detail-kv"><dt>发起者</dt><dd>测试 Agent</dd><dt>执行器</dt><dd>sample-validator</dd><dt>Job 标识</dt><dd>demo-validation-01</dd><dt>退出码</dt><dd>尚未产生</dd></dl>${consoleBlock('stdout / stderr',paused?'演示已暂停；没有真实进程。':'loaded 12 synthetic examples\nchecking required fields…\nwaiting for validation result')}<button class="detail-action" data-agent="tester">查看所属智能体 ${icon('arrow')}</button></div>`:`<div class="empty-state">${icon('terminal')}<h3>后台很安静</h3><p>当前没有后台 Job。导入、导出、容器命令或发布运行时会显示在这里。</p></div>`}<p class="note">每次后台操作只计一个 Job，其子进程不会重复计数。模型对话本身不计为 Job。</p>`;}
+function artifactPanel(mode){if(current==='presentation')return presentationPanel();const d=scenarios[current],secondary=mode==='secondary';return `<div class="inspector-eyebrow">${secondary?'VERIFY':'DESIGN'} / 示例草稿</div><article class="paper"><div class="paper-label">JOJO PLAN · WORKING DOCUMENT</div><h2>${esc(secondary?d.b:d.a)}</h2><span class="badge">未正式审阅</span><h3>01　目标与范围</h3><p>${esc(d.user)}</p><h3>02　${secondary?'验证思路':'核心关系'}</h3><p>${current==='system'?(secondary?'每条校验规则须覆盖正常、缺件、金额差异和证据不足的样例。修复后需在同一受测版本复验。':'原始单据通过可定位的证据片段连接到规则，再形成可追溯的结论。规则不直接改写原始材料。'):'明确输入依据和交付要求，保留来源、假设和未解决的问题。'}</p><div class="paper-diagram"><span>材料版本</span>→<span>${secondary?'验证样例':'证据片段'}</span>→<span>${secondary?'检查结果':'规则 / 结论'}</span></div><h3>03　待确认项</h3><ul><li>业务范围和适用条件</li><li>关键假设与例外处理</li><li>可复现的验证依据</li></ul><p class="paper-note">这是界面阅读示例，不是实际项目的审定成果。正式审批须绑定版本与输入基线。</p></article><button class="detail-action" style="margin-top:15px" data-action="artifact-comment">在对话中提出修改 ${icon('arrow')}</button>`;}
+function presentationPanel(){const slides=[['从一次提交，到一次可靠发布','面向新人的 CI/CD 实践'],['把手工步骤，变成可重复的流程','构建 · 测试 · 部署'],['失败并不可怕，无法复现才是','记录依据，缩小范围，验证修复']];return `<div class="notice">PPT 工作包尚在规划中。下方是预览交互示意，未生成真实 PPTX。</div><div class="deck-preview"><div class="overline">CI/CD FIELD NOTES · ${String(slideIndex+1).padStart(2,'0')}</div><h3>${slides[slideIndex][0]}</h3><p>${slides[slideIndex][1]}</p></div><div class="slide-nav"><button data-slide="-1" aria-label="上一张幻灯片" ${slideIndex===0?'disabled':''}>←</button><span>${slideIndex+1} / 3 · 示意页面</span><button data-slide="1" aria-label="下一张幻灯片" ${slideIndex===2?'disabled':''}>→</button></div><dl class="detail-kv"><dt>可编辑文件</dt><dd>PPTX · 待生成器接入</dd><dt>视觉验证</dt><dd>页面渲染 · 待渲染器接入</dd><dt>补充产物</dt><dd>逐页内容、来源索引、演讲备注</dd></dl>`;}
+function materialsPanel(){const files=meta[current].files;return `<div class="inspector-eyebrow">${files.length} 个示例文件 · 当前工作</div>${files.length?files.map((f,i)=>`<div class="file-row">${icon('file')}<div><strong>${esc(f)}</strong><small>${i===2?'合成样本':'参考材料'} · 示例条目</small></div><span class="badge">本地</span></div>`).join(''):`<div class="empty-state">${icon('folder')}<h3>还没有工作材料</h3><p>先明确工作目标，再补充资料。</p></div>`}<p class="note">当前是设计演示，不读取你的真实文件，也不会向模型发送材料。</p><button class="detail-action" data-action="materials-note">在对话中补充材料说明 ${icon('arrow')}</button>`;}
+function planPanel(){const m=meta[current];return `<div class="inspector-eyebrow">${esc(scenarios[current].type)} / 完整流程</div>${m.stages.map((s,i)=>`<div class="plan-row"><span class="num">${String(i+1).padStart(2,'0')}</span><div><strong>${esc(s)}</strong><p>${i<m.phase?'示例状态：本阶段已完成':i===m.phase?'当前阶段：'+esc(scenarios[current].state):'完成前置工作后开始'}</p></div>${i<m.phase?'<span class="badge green" style="margin-left:auto;align-self:flex-start">已完成</span>':''}</div>`).join('')}<p class="note">阶段的审阅门槛保留在同一条工作主线。文字中的“继续”不会替代绑定版本的审批。</p>`;}
+function modelPanel(){return `<div class="inspector-eyebrow">协调者 / 模型与技能</div><h3 class="detail-heading">主协调 Agent</h3><p class="detail-description">组织当前工作、整理补充要求，并把任务交给对应的替身。</p><dl class="detail-kv"><dt>当前工作包</dt><dd>${esc(scenarios[current].type)}</dd><dt>版本</dt><dd>1.0.0 · 设计示例</dd><dt>模型连接</dt><dd>尚未连接真实服务</dd><dt>权限</dt><dd>由当前项目的授权范围决定</dd></dl><button class="detail-action" data-screen="UI-05">查看模型设置 ${icon('arrow')}</button>`;}
+function inspect(mode,trigger){if(trigger)lastTrigger=trigger;panel=mode;const titles={execution:['agent','智能体'],jobs:['terminal','后台 Jobs'],artifact:['file','成果阅读'],secondary:['file','成果阅读'],materials:['folder','工作材料'],plan:['grid','工作计划'],model:['spark','模型与技能']};const title=titles[mode]||titles.artifact;const body=mode==='execution'?agentsPanel():mode==='jobs'?jobsPanel():mode==='materials'?materialsPanel():mode==='plan'?planPanel():mode==='model'?modelPanel():artifactPanel(mode);const el=$('#UI-03');el.innerHTML=`<div class="inspector-head"><h2>${icon(title[0])}${title[1]}</h2><div class="inspector-actions">${['artifact','secondary'].includes(mode)?`<button class="icon-button" data-action="expand-panel" aria-label="切换宽幅阅读">${icon('expand')}</button>`:''}<button class="icon-button" id="close" data-action="close-panel" aria-label="关闭详情">${icon('close')}</button></div></div><div class="inspector-content">${body}</div>`;el.hidden=false;panelModality();activity();$('#close').focus();}
+function panelModality(){const el=$('#UI-03');if(el.hidden)return;const overlay=innerWidth<=1250;$('.conversation').inert=overlay;if(overlay){el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');}else{el.removeAttribute('role');el.removeAttribute('aria-modal');}}
+function send(){const text=$('#input').value.trim();if(!text||current==='presentation')return;state[current].messages.push({text,target:state[current].target});state[current].draft='';state[current].target=null;$('#input').value='';renderTimeline();activity();targetChip();$('#timeline').scrollTop=$('#timeline').scrollHeight;toast('补充已保留在本次演示中，未发送至真实模型。');}
+function newScreen(){setScreen('UI-01');$('#UI-01').innerHTML=`<div class="screen-inner"><div class="start-hero"><span class="brand-mark" aria-hidden="true"><i></i><i></i></span><div class="overline">YOUR NEXT GOOD IDEA</div><h1>你想做成什么？<br>让替身一起。</h1><p class="screen-lead">从一个想法开始，把研究、技能和团队组织起来。<br>你掌握方向，Jojo 推进每一步。</p></div><div class="type-options">${[['skill','spark','制作 Skill','研究方法，沉淀为能力'],['document','file','写文档','组织内容，核查依据'],['system','code','开发系统','从产品方案到工程交付']].map(([k,i,t,desc])=>`<button class="type-option" data-new-type="${k}" aria-pressed="${newType===k}">${icon(i)}<strong>${t}</strong><small>${desc}</small></button>`).join('')}</div><form class="new-form" id="new-form"><label class="field-label" for="new-goal">工作目标</label><textarea id="new-goal" placeholder="例如：把销售单据整理成可追溯的勾稽链条，并开发相应的校验系统。" maxlength="20000" required></textarea><div id="goal-error" class="field-error" role="alert"></div><div class="form-bottom"><label class="sr-only" for="new-project">所属项目</label><select id="new-project"><option>审计项目</option><option>护照校验项目</option><option>知识与分享</option></select><button class="primary-button" type="submit">预览工作计划 ${icon('arrow')}</button></div></form><p class="note">本次仅创建演示草稿。真实工作启动前需确认模型、预算、权限及材料范围。</p></div>`;$('#new-form').addEventListener('submit',e=>{e.preventDefault();createDraft();});}
+function createDraft(){const goal=$('#new-goal').value.trim();if(!goal){$('#goal-error').textContent='请先描述想完成的工作。';$('#new-goal').focus();return;}const key='draft-'+Date.now(),project=$('#new-project').value;scenarios[key]={...scenarios[newType],title:goal.length>18?goal.slice(0,18)+'…':goal,user:goal,reply:'已整理为一个演示工作草稿。下一步需要补齐交付要求，再确认模型、预算与材料权限。此处不会调用模型或启动执行。',state:'草稿 · 尚未启动',plan:'确认工作目标',a:'交付要求 · 待整理',b:'启动清单 · 待确认',activity:'当前没有真实智能体或后台 Job。'};meta[key]={...meta[newType],project,tagline:'把目标整理清楚，再开始下一步。',short:'演示草稿 · 未启动',count:0,jobs:0,phase:0,files:[],number:'NEW'};state[key]={draft:'',messages:[],paused:false,target:null,scroll:null};groups.find(g=>g.name===project).keys.push(key);task(key);toast('已创建演示草稿。关闭或刷新页面后清除，不会启动真实工作。');}
+function library(){setScreen('UI-04');$('#UI-04').innerHTML=`<div class="screen-inner"><div class="overline">CAPABILITIES, COMPOSED.</div><h1>同一个替身，<br>不止一种工作方式。</h1><p class="screen-lead">工作包把流程、角色、技能和工具组合起来。新的能力接进来，你熟悉的工作区不需要改变。</p><div class="package-grid">${[['skill','spark','制作 Skill','把研究变成可复用的方法。定义输入输出，组织技能依赖，验证后再启用。'],['document','file','写文档','从大纲到正文，用来源支撑观点。经验分享和测试报告保留各自的证据要求。'],['system','code','开发系统','产品、设计、架构、研发与测试协作推进。阶段审阅、缺陷修复、最终验收都留在主线上。'],['presentation','slides','写 PPT','从故事线到逐页内容、排版和渲染检查。后续接入生成器与预览器，沿用同一个工作区。']].map(([k,i,t,desc],n)=>`<article class="package-card"><span class="package-id">0${n+1} / WORK PACKAGE</span><span class="package-icon">${icon(i)}</span><h2>${t}${k==='presentation'?'<span class="badge amber">规划中</span>':''}</h2><p>${desc}</p><button data-task="${k}">${k==='presentation'?'查看扩展设计':'查看工作示例'} ${icon('arrow')}</button></article>`).join('')}</div><p class="note">首版三类工作包。新增格式需要经过验证的工具支持，不能只换一段提示词。</p></div>`;}
+function settings(){setScreen('UI-05');$('#UI-05').innerHTML=`<div class="screen-inner"><div class="overline">YOUR WORKSPACE, YOUR RULES.</div><h1>能力由你选择，<br>边界由你决定。</h1><p class="screen-lead">模型、工具和权限分开管理。缺少能力时明确说明，工作记录始终留在你的项目里。</p><div class="settings-list">${[['模型连接','自带模型服务；各角色可选择不同模型。','未连接'],['工具与环境','搜索、OCR、容器和发布目标分别检查。','查看说明'],['权限与预算','材料发送范围、工具权限与运行上限。','查看说明'],['数据与备份','本地保存、备份恢复和项目归档。','查看说明']].map(([t,d,b])=>`<div class="setting-row"><div><h2>${t}</h2><p>${d}</p></div><button data-setting="${t}">${b}</button></div>`).join('')}<div class="setting-row"><div><h2>演示说明</h2><p>页面中的新增草稿、补充和暂停只作用于本次演示；刷新即清除。</p></div><button data-setting="演示说明">了解演示范围</button></div></div><div class="notice" id="setting-info" hidden></div></div>`;}
+function search(){saveDraft();$('#palette-input').value='';paletteIndex=0;renderSearch();$('#palette').showModal();$('#palette-input').focus();}
+function renderSearch(){const q=$('#palette-input').value.trim().toLowerCase();const items=Object.keys(scenarios).filter(k=>(scenarios[k].title+meta[k].project).toLowerCase().includes(q)).map(k=>({task:k,label:scenarios[k].title,sub:meta[k].project,icon:'file'}));for(const [id,label] of [['UI-01','新工作'],['UI-04','能力库'],['UI-05','设置']])if(label.includes(q))items.push({screen:id,label,sub:'工作区',icon:'grid'});paletteIndex=Math.max(0,Math.min(paletteIndex,items.length-1));$('#palette-results').innerHTML=items.length?items.map((x,i)=>`<button class="palette-item ${i===paletteIndex?'chosen':''}" ${x.task?`data-task="${x.task}"`:`data-screen="${x.screen}"`}>${icon(x.icon)}<strong>${esc(x.label)}</strong><small>${esc(x.sub)}</small></button>`).join(''):'<div class="empty-state"><h3>没有找到匹配的工作</h3><p>试试项目名称，或直接新建工作。</p></div>';}
+function navigate(id){if(id==='UI-01')newScreen();else if(id==='UI-04')library();else if(id==='UI-05')settings();}
+document.addEventListener('click',e=>{
+ const b=e.target.closest('button,[data-action]');if(!b)return;
+ if(b.closest('#palette')&&(b.dataset.task||b.dataset.screen))$('#palette').close();
+ if(b.dataset.task)task(b.dataset.task);
+ if(b.dataset.screen)navigate(b.dataset.screen);
+ if(b.dataset.group){const el=$('#group-'+b.dataset.group);el.hidden=!el.hidden;b.setAttribute('aria-expanded',!el.hidden);}
+ if(b.dataset.inspect){if(panel===b.dataset.inspect)closePanel();else inspect(b.dataset.inspect,b);}
+ if(b.dataset.agent){selectedAgent=b.dataset.agent;inspect('execution',b.closest('#UI-03')?lastTrigger:b);}
+ if(b.dataset.target){state[current].target=agentNames[b.dataset.target];closePanel(false);targetChip();$('#input').focus();}
+ if(b.dataset.newType){newType=b.dataset.newType;$$('[data-new-type]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.newType===newType));}
+ if(b.dataset.slide){slideIndex+=Number(b.dataset.slide);inspect(panel||'artifact');}
+ if(b.dataset.setting){const text={'模型连接':'设计演示不收集密钥，也不测试真实连接。正式产品支持服务地址、协议、模型标识与能力检查。','工具与环境':'各项能力单独验证。容器不可用时，写技能和文档仍可工作；PPT 生成和渲染属于后续扩展。','权限与预算':'真实启动前确认材料发送范围和 token 上限。对话补充不能代替生产发布授权。','数据与备份':'正式产品支持本地备份、恢复和归档。此设计稿不会读写你的项目文件。','演示说明':'所有执行状态和成果均为示例。交互只存于当前页面内存；不会调用模型、运行进程或保存密钥。'}[b.dataset.setting];$('#setting-info').hidden=false;$('#setting-info').textContent=text;$('#setting-info').scrollIntoView({block:'nearest'});}
+ const action=b.dataset.action;
+ if(action==='new'){e.preventDefault();newScreen();}
+ if(action==='search')search();
+ if(action==='close-palette')$('#palette').close();
+ if(action==='close-panel')closePanel();
+ if(action==='expand-panel'){$('#UI-03').classList.toggle('wide');b.setAttribute('aria-pressed',$('#UI-03').classList.contains('wide'));}
+ if(action==='clear-target'){state[current].target=null;targetChip();$('#input').focus();}
+ if(action==='artifact-comment'||action==='materials-note'){const value=action==='artifact-comment'?'关于这份成果，我希望调整：':'补充材料说明：';closePanel(false);$('#input').value=state[current].draft+value;state[current].draft=$('#input').value;activity();$('#input').focus();}
+ if(b.id==='pause'){state[current].paused=!state[current].paused;const scroll=$('#timeline').scrollTop;renderTimeline();$('#timeline').scrollTop=scroll;activity();if(panel)inspect(panel);toast(state[current].paused?'演示已暂停：计数与详情已同步。没有真实进程被停止。':'演示已恢复：这不会启动真实模型或进程。');}
+ if(b.id==='send')send();
+});
+$('#input').addEventListener('input',()=>{state[current].draft=$('#input').value;$('#send').disabled=!$('#input').value.trim()||current==='presentation';});
+$('#palette-input').addEventListener('input',()=>{paletteIndex=0;renderSearch();});
+$('#palette').addEventListener('click',e=>{if(e.target===$('#palette')){const r=$('#palette').getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)$('#palette').close();}});
+document.addEventListener('keydown',e=>{
+ if(e.isComposing)return;
+ if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();if(!$('#palette').open)search();return;}
+ if($('#palette').open){if(['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();const n=$$('.palette-item').length;paletteIndex=Math.max(0,Math.min(n-1,paletteIndex+(e.key==='ArrowDown'?1:-1)));renderSearch();$('.palette-item.chosen')?.scrollIntoView({block:'nearest'});}if(e.key==='Enter'&&document.activeElement===$('#palette-input')){e.preventDefault();$('.palette-item.chosen')?.click();}return;}
+ if(e.key==='Escape'&&panel){e.preventDefault();closePanel();return;}
+ if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='n'){e.preventDefault();newScreen();$('#new-goal').focus();return;}
+ if((e.metaKey||e.ctrlKey)&&e.key==='Enter'&&screen==='UI-02'&&!$('.conversation').inert){e.preventDefault();send();}
+ if(e.key==='Tab'&&panel&&innerWidth<=1250){const els=$$('#UI-03 button:not(:disabled),#UI-03 [tabindex="0"]');const first=els[0],last=els.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}
+});
+window.addEventListener('resize',panelModality);
+nav();task('system');

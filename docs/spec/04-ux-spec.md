@@ -33,7 +33,7 @@ flowchart LR
 | UI-04 | 技能与工作包 | 左下“能力库” | 技能版本与验证、工作包说明/所需能力/可用状态；不在这里开展工作 |
 | UI-05 | 设置 | 左下“设置”；缺能力时定向打开 | 模型、搜索/OCR、运行环境、数据/备份、权限与预算；关闭回原任务 |
 
-在1440×900设计基准下，侧栏224px；对话正文最大800px居中；详情打开时分配360–440px。最小1100×720，右详情切为覆盖面板，主对话无需横向挤压；Esc关闭并还原焦点。每区独立纵向滚动；输入框始终可达。正文14–16px，不能靠缩小字号容纳更多面板。
+在1440×900设计基准下，侧栏232px（紧凑窗口208px）；对话内容最大760px居中；详情打开时分配365px，大窗口可扩展420px。最小1100×720，右详情切为覆盖面板，主对话无需横向挤压；Esc关闭并还原焦点。每区独立纵向滚动；输入框始终可达。正文14–16px，不能靠缩小字号容纳更多面板。
 
 ## 3. 开始和持续对话
 
@@ -113,3 +113,13 @@ Cmd+N新工作；Cmd+Enter发送；Enter默认换行，输入法组合期间禁�
 execution.snapshot结果增加activitySummary={activeAgentCount,runningJobCount,queuedJobCount,uncertainJobCount,asOfSequence,observedAt}及jobs数组，来源与树使用同一快照。后台操作必须记录executionMode=background及workId（持久化为tool_operation.execution_mode和work_id；服务验证work与project及attempt归属一致），不能由前端看名称猜测；列表将操作intent显示为queued，其余映射为running/uncertain/succeeded/failed/cancelled；数据库沿用intent状态。Job详情显示operationId、所属Agent/attempt（系统任务可为空）、名称、状态、开始时间、最后活动、执行器、进程引用、结果/日志引用。历史分页复用执行快照游标；终态从活跃计数移除但保留记录。收到operation/process/attempt事件后更新同一投影；重连先核对再显示状态。
 
 W-19/T-43追加验收：长对话滚动仍可见执行栏；两个Agent共享一个后台操作只计一个Job；一个Job有多个进程不重复计数；失败/退出/断线恢复后计数与列表一致；其他项目任务不混入；空闲协调者不虚增活跃数量。设计稿“2个智能体、1个Job”为演示数据。
+
+## Design Edition 02 · 视觉与交互质量基线（2026-10-02）
+
+用户明确以Awwwards、Webby Awards、FWA获奖作品品质为长期目标。本轮按[品质标准与迭代记录](../design/quality-review.md)进行多轮检查；这是设计交付品质目标，不把模拟Agent当实现完成，不以自评分冒充外部评审。
+
+当前设计以[screenboard.css](../design/screenboard.css)的设计变量与[screenboard.js](../design/screenboard.js)的交互状态演示为视觉交付依据：暖白#FBFAF7、正文#292633、强调紫#6350B9、辅助文字#686172；双重轮廓品牌标识；正文桌面14px、辅助文字主要10–12px。窄于首版最小窗口时提供阅读退化布局，不因此新增移动端交付承诺。
+
+交互新增：项目组折叠、Cmd/Ctrl+K搜索、Cmd/Ctrl+N新工作、保持任务输入与阅读位置、角色卡定向补充、成果宽幅阅读、PPT逐页示例预览。初次进入定位最新工作，返回已有工作恢复滚动位置。右侧覆盖模式管理焦点和背景交互，Esc回到原入口；减少动态效果偏好关闭过渡。
+
+设计稿中的新建、消息、暂停和恢复只改变当前页面的演示状态，刷新即清除；真实实现必须接前述持久化与授权接口。设置页不收集密钥，明确展示能力配置的真实实现边界。首版依旧三个可运行工作类型，PPT只用于扩展结构审阅。

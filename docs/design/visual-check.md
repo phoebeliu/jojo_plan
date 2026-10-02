@@ -1,11 +1,11 @@
-# 对话设计稿显示检查
+# Design Edition 02 · 显示与交互检查
 
-JP-1.1｜2026-09-25。检查对象screenboard.html是静态交互设计稿，所有数据为示例。
+2026-10-02。当前稿为screenboard.html + screenboard.css + screenboard.js，全部执行数据为示例，无真实模型或后台进程。
 
-本地Playwright/Chromium完成40项检查：在1440×900和1100×900下逐个切换系统、护照、Skill、文档、PPT五种情境及执行/成果详情，检查新工作、能力库与设置；另外检查1100×720窗口。未出现文档级横向溢出或浏览器脚本错误。验证了子代理详情选择、Esc关闭、输入作为纯文本显示、规划PPT发送按钮禁用。
+完成四轮修订，最终浏览器23项组检查全部通过。覆盖六个工作情境、任务输入/消息/定向补充保留、暂停/恢复同步、搜索、演示新建、PPT预览、面板焦点返回与键盘边界、减少动态效果、文字放大以及无脚本错误/无外部HTTP请求。1440×900、1100×720、768×900、390×844分别检查对话与详情无横向溢出、主输入操作可达。
 
-截图：[主对话](conversation-workspace.png)、[Agent与进程](agent-inspector.png)、[成果阅读](artifact-review.png)、[PPT扩展](ppt-extension.png)。主对话、Agent与PPT截图已逐张查看，文字、内容层级和主操作可读。旧14页设计稿不再作为当前界面依据。
+1029个可见纯色背景文字样本对比度检查无失败。此检查排除禁用、装饰、渐变背景文字，不代表完整WCAG认证。200%检查是文字尺寸放大后的页面溢出检查，不是macOS系统级缩放或屏幕阅读器完整验收。
 
-未验证真实模型/进程、后台消息投递、完整焦点管理、200%缩放或安装。右侧覆盖面板的正式焦点约束需按T-48实现验收；静态稿展示结构不代表应用已开发。
+截图：[工作区](conversation-workspace.png)、[智能体](agent-inspector.png)、[后台Jobs](background-jobs.png)、[成果阅读](artifact-review.png)、[新工作](new-work.png)、[能力库](capability-library.png)、[设置](settings.png)、[搜索](command-palette.png)、[PPT扩展](ppt-extension.png)、[紧凑窗口](compact-workspace.png)、[极窄窗口](narrow-workspace.png)。已查看工作区、Agent、新工作、成果、能力库和两种窄窗口的实际截图。
 
-本轮追加：常驻执行栏显示当前工作的智能体和后台Job数量，后台Job入口可打开sample-validator示例日志；已随原浏览器检查重新运行。截图见[后台Jobs](background-jobs.png)。
+可复现脚本与JSON结果位于[检查说明](checks/README.md)。迭代发现及获奖品质目标见[品质审阅](quality-review.md)。真实运行、持久化、安装、跨浏览器与业务正确性尚需应用研发后验证。

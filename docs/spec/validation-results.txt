@@ -1,5 +1,5 @@
 JP-1.1 specification validation: PASS
-170 checks; 45 SQL tables; 52 API methods; 3 workflow DAGs; 41 local links
+176 checks; 45 SQL tables; 52 API methods; 3 workflow DAGs; 47 local links
 Scope: document/schema validation only. No application, provider, container or production execution tests were run by this script.
 PASS SQL foreign keys enabled
 PASS At most one live workflow per work
@@ -135,9 +135,13 @@ PASS Link exists 06-system-design.md -> 08-api-contracts.md
 PASS Link exists 06-system-design.md -> 15-conversation-and-extension.md
 PASS Link exists 13-readiness-review.md -> validate_spec.py
 PASS Link exists 13-readiness-review.md -> validation-results.txt
+PASS Link exists 13-readiness-review.md -> ../design/quality-review.md
 PASS Link exists 04-ux-spec.md -> 03-prd.md
 PASS Link exists 04-ux-spec.md -> ../design/screenboard.html
 PASS Link exists 04-ux-spec.md -> 15-conversation-and-extension.md
+PASS Link exists 04-ux-spec.md -> ../design/quality-review.md
+PASS Link exists 04-ux-spec.md -> ../design/screenboard.css
+PASS Link exists 04-ux-spec.md -> ../design/screenboard.js
 PASS Link exists 07-data-model.md -> schema.sql
 PASS Link exists 07-data-model.md -> 15-conversation-and-extension.md
 PASS Link exists 00-reading-guide.md -> 01-owner-decisions.md
@@ -160,10 +164,12 @@ PASS Link exists 00-reading-guide.md -> 15-conversation-and-extension.md
 PASS Link exists 00-reading-guide.md -> 14-artifact-content-contracts.md
 PASS Link exists 00-reading-guide.md -> 04-ux-spec.md
 PASS Link exists 00-reading-guide.md -> 15-conversation-and-extension.md
+PASS Link exists 00-reading-guide.md -> ../design/quality-review.md
 PASS Link exists 02-research-and-adrs.md -> ../research.md
 PASS Link exists 03-prd.md -> ../work-scenarios.md
 PASS Link exists 03-prd.md -> 01-owner-decisions.md
 PASS Link exists 03-prd.md -> 15-conversation-and-extension.md
+PASS Link exists 03-prd.md -> ../design/quality-review.md
 PASS Link exists 15-conversation-and-extension.md -> work-type-registry.json
 PASS Link exists 15-conversation-and-extension.md -> work-type.schema.json
 PASS Link exists 09-workflows-and-agents.md -> workflow-templates.json

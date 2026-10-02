@@ -1,0 +1,100 @@
+{
+  "date": "2026-10-02T01:53:19.989Z",
+  "scope": "Static design only; no runtime/LLM/production tests",
+  "results": [
+    {
+      "name": "Initial view opens at latest work, with artifacts reachable",
+      "pass": true
+    },
+    {
+      "name": "All six task scenarios render and counts match",
+      "pass": true
+    },
+    {
+      "name": "Draft, target and conversation survive task switching",
+      "pass": true
+    },
+    {
+      "name": "Pause / resume counters and job details agree",
+      "pass": true
+    },
+    {
+      "name": "Agent details and targeted steering connect to composer",
+      "pass": true
+    },
+    {
+      "name": "Agent selection does not leak across work types",
+      "pass": true
+    },
+    {
+      "name": "Untrusted input stays literal text",
+      "pass": true
+    },
+    {
+      "name": "Search matches project, supports keyboard and empty state",
+      "pass": true
+    },
+    {
+      "name": "New draft belongs to chosen project and starts no jobs",
+      "pass": true
+    },
+    {
+      "name": "PPT stays unavailable while preview slides work",
+      "pass": true
+    },
+    {
+      "name": "Settings explain limitations without requesting credentials",
+      "pass": true
+    },
+    {
+      "name": "No horizontal clipping at 1440x900",
+      "pass": true
+    },
+    {
+      "name": "Primary controls reachable at 1440x900",
+      "pass": true
+    },
+    {
+      "name": "No horizontal clipping at 1100x720",
+      "pass": true
+    },
+    {
+      "name": "Primary controls reachable at 1100x720",
+      "pass": true
+    },
+    {
+      "name": "No horizontal clipping at 768x900",
+      "pass": true
+    },
+    {
+      "name": "Primary controls reachable at 768x900",
+      "pass": true
+    },
+    {
+      "name": "No horizontal clipping at 390x844",
+      "pass": true
+    },
+    {
+      "name": "Primary controls reachable at 390x844",
+      "pass": true
+    },
+    {
+      "name": "Overlay traps Tab and Escape restores focus",
+      "pass": true
+    },
+    {
+      "name": "Reduced motion removes active animation",
+      "pass": true
+    },
+    {
+      "name": "200% text enlargement keeps primary content scrollable",
+      "pass": true
+    },
+    {
+      "name": "No JavaScript errors or external network dependencies",
+      "pass": true
+    }
+  ],
+  "errors": [],
+  "external": []
+}
