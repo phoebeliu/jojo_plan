@@ -1,5 +1,5 @@
 {
-  "date": "2026-10-02T10:42:54.121Z",
+  "date": "2026-10-08T13:22:47.963Z",
   "scope": "Static design only; no runtime/LLM/production tests",
   "results": [
     {
@@ -48,6 +48,14 @@
     },
     {
       "name": "Delivery change invalidates evidence without fabricating a pass",
+      "pass": true
+    },
+    {
+      "name": "Delivery summary stays visible when conversation is scrolled",
+      "pass": true
+    },
+    {
+      "name": "Evidence locator and handoff keep context and disclose simulation",
       "pass": true
     },
     {

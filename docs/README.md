@@ -21,3 +21,5 @@
 本轮修订：前六项决定已确认；统一任务对话、可展开的Agent/进程详情、工作包扩展。写PPT已定义后续接入方式，未承诺首版生成能力。
 
 最新 S1：[产品定位与竞争研究](strategy/00-readme.md)、[用户与市场材料](strategy/04-audience-and-launch.md)、[投资人备忘录](strategy/03-business-and-moat.md)、[交付闭环补充规格](spec/16-delivery-contract.md)。既有JP-1.1与S1配套阅读，旧稿不能覆盖新决定。
+
+2026-10-08：设计稿以[Design Edition 03](design/edition-03-review.md)为当前表现规格；结合S1交付定位修订工作区、入口文案、依据/变更/交接细节。

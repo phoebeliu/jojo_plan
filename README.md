@@ -19,3 +19,5 @@
 2026-10-02：交互设计升级为 **Design Edition 02**，包含统一视觉体系、常驻执行栏、角色协作卡、快捷搜索和可操作演示。参阅[品质审阅与检查记录](docs/design/quality-review.md)。
 
 战略修订 S1：[为什么值得存在](docs/strategy/00-readme.md) · [竞品研究](docs/strategy/01-competitive-research.md) · [投资人备忘录](docs/strategy/03-business-and-moat.md) · [用户与推广材料](docs/strategy/04-audience-and-launch.md)。当前为设计阶段，没有已验证护城河。
+
+2026-10-08：最新设计为 **Design Edition 03**。交付状态常驻，依据可定位到版本与样本，变更可预演，交接清单与缺口一起查看。入口仍为[交互设计稿](docs/design/screenboard.html)，详见[本轮设计审阅](docs/design/edition-03-review.md)。

@@ -1,5 +1,5 @@
 JP-1.1 specification validation: PASS
-193 checks; 45 SQL tables; 52 API methods; 3 workflow DAGs; 64 local links
+196 checks; 45 SQL tables; 52 API methods; 3 workflow DAGs; 67 local links
 Scope: document/schema validation only. No application, provider, container or production execution tests were run by this script.
 PASS SQL foreign keys enabled
 PASS At most one live workflow per work
@@ -146,6 +146,7 @@ PASS Link exists 04-ux-spec.md -> ../design/quality-review.md
 PASS Link exists 04-ux-spec.md -> ../design/screenboard.css
 PASS Link exists 04-ux-spec.md -> ../design/screenboard.js
 PASS Link exists 04-ux-spec.md -> 16-delivery-contract.md
+PASS Link exists 04-ux-spec.md -> ../design/edition-03-review.md
 PASS Link exists 07-data-model.md -> schema.sql
 PASS Link exists 07-data-model.md -> 15-conversation-and-extension.md
 PASS Link exists 07-data-model.md -> 16-delivery-contract.md
@@ -172,6 +173,7 @@ PASS Link exists 00-reading-guide.md -> 15-conversation-and-extension.md
 PASS Link exists 00-reading-guide.md -> ../design/quality-review.md
 PASS Link exists 00-reading-guide.md -> ../strategy/00-readme.md
 PASS Link exists 00-reading-guide.md -> 16-delivery-contract.md
+PASS Link exists 00-reading-guide.md -> ../design/edition-03-review.md
 PASS Link exists 02-research-and-adrs.md -> ../research.md
 PASS Link exists 02-research-and-adrs.md -> ../strategy/01-competitive-research.md
 PASS Link exists 05-team-briefing.md -> 16-delivery-contract.md
@@ -186,6 +188,7 @@ PASS Link exists 03-prd.md -> ../strategy/05-validation-plan.md
 PASS Link exists 15-conversation-and-extension.md -> work-type-registry.json
 PASS Link exists 15-conversation-and-extension.md -> work-type.schema.json
 PASS Link exists 12-development-plan.md -> 16-delivery-contract.md
+PASS Link exists 12-development-plan.md -> ../design/edition-03-review.md
 PASS Link exists 14-artifact-content-contracts.md -> 16-delivery-contract.md
 PASS Link exists 09-workflows-and-agents.md -> workflow-templates.json
 PASS Link exists 09-workflows-and-agents.md -> 14-artifact-content-contracts.md

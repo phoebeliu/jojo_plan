@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-08T13:24:15.717Z",
+  "scope": "Static design, delivery/modal/readability checks only",
+  "results": [
+    {
+      "name": "Overlay excludes every background region and restores the delivery trigger",
+      "pass": true
+    },
+    {
+      "name": "Change preview traps keyboard focus and preserves an independent result",
+      "pass": true
+    },
+    {
+      "name": "Latest collaboration and checkpoint are readable at desktop size",
+      "pass": true
+    },
+    {
+      "name": "Compact stage retains its complete plan action",
+      "pass": true
+    }
+  ]
+}

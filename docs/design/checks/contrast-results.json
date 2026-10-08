@@ -1,5 +1,5 @@
 {
-  "testedTextSamples": 1367,
+  "testedTextSamples": 1650,
   "failures": [],
   "scope": "Visible solid-background text samples, excludes decorative/disabled/gradient text; not a complete WCAG or screen-reader audit"
 }

@@ -14,3 +14,5 @@ node docs/design/checks/contrast-check.cjs
 对比度检查只覆盖当前可见纯色背景文字，排除渐变、装饰、禁用内容；不能替代完整辅助功能审核。浏览器检查的200%是文字样式放大，不宣称等价系统级缩放。测试中的模拟执行状态用于交互一致性检查，不是运行服务实测。
 
 S1增加交付约定、变更预演、应用后旧依据失效、跨工作不串状态以及重置示例检查；24组浏览器检查。四种宽度亦覆盖交付详情。新增截图delivery-contract、change-preview、change-applied。检查仍只覆盖静态演示；不验证真实baseline事务、模型或专业结论。
+
+2026-10-08 Edition03：browser-check包含26组检查；edition03-check另检查四条新增模态/阅读路径。contrast-check覆盖依据定位、交接清单及变更前后。新增截图evidence-locator、handoff-preview。原版本的24组记录为历史。新增的edition03-results.json同样只验证静态设计，不声明真实运行或获奖。
