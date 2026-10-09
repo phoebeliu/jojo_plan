@@ -105,3 +105,7 @@ work_type_version锁定工作包内容，允许改变启用状态；conversation
 ## S1补充（2026-10-02）
 
 [S1交付约定](16-delivery-contract.md)保存在artifact_version.metadata_json.deliveryContract；关系复用artifact_link，版本与指纹仍是唯一判定依据。SQL不加表，应用层必须按内容契约验证字段、同项目引用和正文一致性；通用JSON合法不够。
+
+## S2补充（2026-10-09）
+
+S2的memory_entry/revision/use与view_intent为待设计迁移的扩展，未混入原45表。[S2规格](17-personal-ai-intelligent-ui.md)要求遗忘墓碑与正文移除，不能把不可变产物的永久保留策略直接用于个人记忆。

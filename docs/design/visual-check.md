@@ -11,3 +11,7 @@
 - [紧凑窗口](compact-workspace.png) / [窄窗口](narrow-workspace.png)：保留主操作，详情适配模态。
 
 人工审查主工作区、依据、变更、新工作和窄窗口实际截图。任务行为和检查结果见[本轮审阅](edition-03-review.md)与checks目录。纯色文字对比度抽样不等于完整WCAG认证；没有进行屏幕阅读器或真实macOS应用验收。
+
+## Edition04（2026-10-09）
+
+当前首屏与既有截图已更新。新增[个人工作准则](personal-methods.png)、[经验候选](method-candidate.png)、[界面推荐理由](intelligent-ui-reasons.png)、[变更后的情境检查点](adaptive-change.png)。来源与候选均明确标记，个人化暂停/固定仅作用于页面内存，不执行真实学习。设计与研究见[Edition04审阅](edition-04-review.md)。前版数值为当轮历史。

@@ -80,3 +80,7 @@ JP-1.1事件新增conversation.message_created/message_updated、execution.proce
 ## S1补充（2026-10-02）
 
 [S1内容约束](16-delivery-contract.md)适用于artifact.saveDraft/publishVersion/read、change.preview/apply与data.export既有命令。不得用新增UI中的模拟状态当作RPC返回；预演指纹过期仍按原错误处理。无新方法，无外部Agent双向同步协议。
+
+## S2补充（2026-10-09）
+
+S2记忆及ViewIntent命令是[后续扩展清单](17-personal-ai-intelligent-ui.md)，不是原52方法已支持。Schema、幂等、错误与消费者测试须随扩展版本发布。

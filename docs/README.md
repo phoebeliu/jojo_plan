@@ -23,3 +23,7 @@
 最新 S1：[产品定位与竞争研究](strategy/00-readme.md)、[用户与市场材料](strategy/04-audience-and-launch.md)、[投资人备忘录](strategy/03-business-and-moat.md)、[交付闭环补充规格](spec/16-delivery-contract.md)。既有JP-1.1与S1配套阅读，旧稿不能覆盖新决定。
 
 2026-10-08：设计稿以[Design Edition 03](design/edition-03-review.md)为当前表现规格；结合S1交付定位修订工作区、入口文案、依据/变更/交接细节。
+
+## S2补充（2026-10-09）
+
+最新定位S2与Design Edition04见[Personal AI研究](strategy/07-personal-ai-intelligent-ui.md)和[设计审阅](design/edition-04-review.md)。S1继续构成交付底座，S2记忆/情境服务尚未实现。

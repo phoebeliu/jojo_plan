@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-09T04:27:26.144Z",
+  "scope": "Static Personal AI/Intelligent UI fixtures; not persistent memory, model or business validation",
+  "results": [
+    {
+      "name": "Personal rules disclose actual source and suspend per work",
+      "pass": true
+    },
+    {
+      "name": "Accepted method candidate stays unvalidated and can be declined",
+      "pass": true
+    },
+    {
+      "name": "Pinned component does not freeze changed delivery state",
+      "pass": true
+    },
+    {
+      "name": "Project context is isolated and settings opens a usable panel",
+      "pass": true
+    },
+    {
+      "name": "New panels fit desktop and narrow windows with keyboard access",
+      "pass": true
+    }
+  ]
+}

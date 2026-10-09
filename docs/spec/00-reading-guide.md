@@ -37,3 +37,7 @@ JP-1.1 重点先看 [新交互设计](04-ux-spec.md) 与 [扩展协议](15-conve
 定位与设计增加 S1 补充：[战略阅读入口](../strategy/00-readme.md)与[交付闭环规格](16-delivery-contract.md)。与JP-1.1共同阅读，接口数量和运行底座不变。
 
 2026-10-08：当前界面表现以[Design Edition 03审阅](../design/edition-03-review.md)及同路径screenboard为准。设计检查与真实运行验收分开，JP-1.1和S1领域契约继续配套阅读。
+
+## S2补充（2026-10-09）
+
+2026-10-09最新补充：[S2研究与定位](../strategy/07-personal-ai-intelligent-ui.md)、[Personal AI与Intelligent UI规格](17-personal-ai-intelligent-ui.md)、[Edition04设计审阅](../design/edition-04-review.md)。基础JP-1.1不变；S2新增存储/命令未纳入原SQL/API Schema，实施前须版本化扩展。

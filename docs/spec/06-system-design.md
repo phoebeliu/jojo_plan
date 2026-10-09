@@ -150,3 +150,7 @@ sequenceDiagram
 ## S1补充（2026-10-02）
 
 [S1交付闭环](16-delivery-contract.md)复用现有领域服务，不创建第二套完成状态。metadata只保存标准和引用，状态来自可信检查、baseline与approval；模型无权写通过。
+
+## S2补充（2026-10-09）
+
+S2建议在既有单写服务内增加记忆与ViewIntent组件；使用同一权限、版本和任务边界。没有隐式全盘监控或任意模型HTML执行。存储/接口扩展待按[S2](17-personal-ai-intelligent-ui.md)版本化实施。

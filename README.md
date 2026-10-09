@@ -1,6 +1,6 @@
 # jojo plan · 替身计划
 
-面向 AI 项目负责人的可验收交付工作台：把模糊要求变成交付约定，在需求变化后找出需要重做和重验的成果。效率优势仍待真实任务验证。
+AI 项目负责人的个人交付替身：按你认可的方法组织工作，用可追溯的依据验收，并提供适合当前任务的交互。个人化与效率优势仍待真实任务验证。
 
 当前成果是 **JP-1.1 开发交接文档包**，不是已实现的应用。
 
@@ -21,3 +21,5 @@
 战略修订 S1：[为什么值得存在](docs/strategy/00-readme.md) · [竞品研究](docs/strategy/01-competitive-research.md) · [投资人备忘录](docs/strategy/03-business-and-moat.md) · [用户与推广材料](docs/strategy/04-audience-and-launch.md)。当前为设计阶段，没有已验证护城河。
 
 2026-10-08：最新设计为 **Design Edition 03**。交付状态常驻，依据可定位到版本与样本，变更可预演，交接清单与缺口一起查看。入口仍为[交互设计稿](docs/design/screenboard.html)，详见[本轮设计审阅](docs/design/edition-03-review.md)。
+
+2026-10-09：最新定位为 **S2 Personal Delivery AI**，设计为 **Edition 04**。[最新研究与护城河机制](docs/strategy/07-personal-ai-intelligent-ui.md) · [实施补充规格](docs/spec/17-personal-ai-intelligent-ui.md)。新增个人准则、经验候选和可解释情境推荐；目前是确定性的静态演示，尚无真实长期学习或持久记忆。

@@ -16,3 +16,7 @@ node docs/design/checks/contrast-check.cjs
 S1增加交付约定、变更预演、应用后旧依据失效、跨工作不串状态以及重置示例检查；24组浏览器检查。四种宽度亦覆盖交付详情。新增截图delivery-contract、change-preview、change-applied。检查仍只覆盖静态演示；不验证真实baseline事务、模型或专业结论。
 
 2026-10-08 Edition03：browser-check包含26组检查；edition03-check另检查四条新增模态/阅读路径。contrast-check覆盖依据定位、交接清单及变更前后。新增截图evidence-locator、handoff-preview。原版本的24组记录为历史。新增的edition03-results.json同样只验证静态设计，不声明真实运行或获奖。
+
+## S2补充（2026-10-09）
+
+2026-10-09 Edition04新增edition04-check.cjs，验证本次暂停不跨工作、候选接受后仍待验证、固定不冻结交付状态、项目隔离与新面板适配。其结果只代表静态规则演示，不证明真实Personal AI或生成UI。
