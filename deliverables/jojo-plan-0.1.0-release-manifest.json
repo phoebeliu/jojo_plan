@@ -1,0 +1,19 @@
+{
+  "version": "0.1.0",
+  "date": "2026-10-09",
+  "sourceCommit": "c9f2f3a532e7de022b20bc7f3f8446cd1cc2b591",
+  "build": "macOS arm64 development acceptance, not notarized",
+  "installer": {
+    "path": "release/Jojo Plan-0.1.0-arm64-mac.zip",
+    "bytes": 142074976,
+    "sha256": "285cd069da891658572c973f7d9972e3cf83124bd42a01c9252b499cd3fa366e"
+  },
+  "installedPreview": "/Users/jingwenliu/Applications/Jojo Plan Preview.app",
+  "evidence": {
+    "domainTests": 14,
+    "liveWorkflowChecks": 8,
+    "liveMethodChecks": 3,
+    "packagedChecks": 7
+  },
+  "scope": "Text delivery and S2 foundations; full system/team/production workflows remain later milestones"
+}
