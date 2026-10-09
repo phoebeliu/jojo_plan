@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:jojo:phase1-response:2",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requestId", "ok", "result", "eventSequence"],
+      "properties": {
+        "requestId": { "type": "string" },
+        "ok": { "const": true },
+        "result": {},
+        "eventSequence": { "type": "integer", "minimum": 0 }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requestId", "ok", "error", "eventSequence"],
+      "properties": {
+        "requestId": { "type": "string" },
+        "ok": { "const": false },
+        "error": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["code", "message", "retryable"],
+          "properties": {
+            "code": {
+              "enum": [
+                "VALIDATION",
+                "NOT_FOUND",
+                "SCOPE_DENIED",
+                "REVISION_CONFLICT",
+                "IDEMPOTENCY_CONFLICT",
+                "STALE_BASELINE",
+                "STALE_VIEW",
+                "METHOD_UNVALIDATED",
+                "BUDGET_EXCEEDED",
+                "PERMISSION_REQUIRED",
+                "PROVIDER_FAILED",
+                "OBJECT_CORRUPT",
+                "INTERNAL"
+              ]
+            },
+            "message": { "type": "string" },
+            "retryable": { "type": "boolean" }
+          }
+        },
+        "eventSequence": { "type": "integer", "minimum": 0 }
+      }
+    }
+  ],
+  "$defs": {
+    "MemoryReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "revision"],
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "revision": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}

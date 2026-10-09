@@ -61,3 +61,7 @@ ViewIntent为声明式数据：schemaVersion、workId、targetFingerprint、comp
 | IU-T04 | 原因与来源可访问，关闭个性化后无个人准则注入 | FR-22/23/27 |
 
 执行顺序：W-02/03建立扩展存储/契约，W-06/08做版本与权限，W-19/20接任务边界与目录，W-04做同区表现，W-17验证上述用例。扩展工期和资源另评估，不承诺原首版工期内无成本加入。
+
+## 2026-10-09实施更新
+
+后端现已落地：机器契约、三次迁移、准则作用域/控制/回归、可信ViewIntent与基础界面。见[闭合契约](18-backend-contract-completion.md)和[实施记录](../implementation/README.md)。自动记忆提炼不冒充已交付。

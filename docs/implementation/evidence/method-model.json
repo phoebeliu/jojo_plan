@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-09T10:41:50.498Z",
+  "scope": "Two synthetic method cases with real model, no production/business claim",
+  "checks": [
+    {
+      "name": "接受方法候选不等于已启用",
+      "pass": true
+    },
+    {
+      "name": "真实正反例形成版本绑定依据",
+      "pass": true
+    },
+    {
+      "name": "可信回归通过后才允许进入上下文",
+      "pass": true
+    }
+  ],
+  "status": "passed"
+}

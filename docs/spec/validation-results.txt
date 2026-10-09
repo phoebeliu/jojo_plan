@@ -1,5 +1,5 @@
 JP-1.1 specification validation: PASS
-207 checks; 45 SQL tables; 52 API methods; 3 workflow DAGs; 78 local links
+217 checks; 45 SQL tables; 52 API methods; 3 workflow DAGs; 88 local links
 Scope: document/schema validation only. No application, provider, container or production execution tests were run by this script.
 PASS SQL foreign keys enabled
 PASS At most one live workflow per work
@@ -135,11 +135,14 @@ PASS Link exists 06-system-design.md -> 08-api-contracts.md
 PASS Link exists 06-system-design.md -> 15-conversation-and-extension.md
 PASS Link exists 06-system-design.md -> 16-delivery-contract.md
 PASS Link exists 06-system-design.md -> 17-personal-ai-intelligent-ui.md
+PASS Link exists 17-personal-ai-intelligent-ui.md -> 18-backend-contract-completion.md
+PASS Link exists 17-personal-ai-intelligent-ui.md -> ../implementation/README.md
 PASS Link exists 13-readiness-review.md -> validate_spec.py
 PASS Link exists 13-readiness-review.md -> validation-results.txt
 PASS Link exists 13-readiness-review.md -> ../design/quality-review.md
 PASS Link exists 13-readiness-review.md -> ../strategy/06-review-log.md
 PASS Link exists 13-readiness-review.md -> 16-delivery-contract.md
+PASS Link exists 13-readiness-review.md -> ../implementation/phase1-review.md
 PASS Link exists 04-ux-spec.md -> 03-prd.md
 PASS Link exists 04-ux-spec.md -> ../design/screenboard.html
 PASS Link exists 04-ux-spec.md -> 15-conversation-and-extension.md
@@ -181,6 +184,8 @@ PASS Link exists 00-reading-guide.md -> ../design/edition-03-review.md
 PASS Link exists 00-reading-guide.md -> ../strategy/07-personal-ai-intelligent-ui.md
 PASS Link exists 00-reading-guide.md -> 17-personal-ai-intelligent-ui.md
 PASS Link exists 00-reading-guide.md -> ../design/edition-04-review.md
+PASS Link exists 00-reading-guide.md -> ../implementation/README.md
+PASS Link exists 00-reading-guide.md -> ../implementation/phase1-review.md
 PASS Link exists 02-research-and-adrs.md -> ../research.md
 PASS Link exists 02-research-and-adrs.md -> ../strategy/01-competitive-research.md
 PASS Link exists 05-team-briefing.md -> 16-delivery-contract.md
@@ -195,9 +200,14 @@ PASS Link exists 03-prd.md -> ../strategy/05-validation-plan.md
 PASS Link exists 03-prd.md -> 17-personal-ai-intelligent-ui.md
 PASS Link exists 15-conversation-and-extension.md -> work-type-registry.json
 PASS Link exists 15-conversation-and-extension.md -> work-type.schema.json
+PASS Link exists 18-backend-contract-completion.md -> ../../packages/contracts/phase1.schema.json
+PASS Link exists 18-backend-contract-completion.md -> ../../packages/contracts/contract-source.mjs
+PASS Link exists 18-backend-contract-completion.md -> ../../packages/storage/migrations/002-personal-ui.sql
+PASS Link exists 18-backend-contract-completion.md -> ../../packages/contracts/response.schema.json
 PASS Link exists 12-development-plan.md -> 16-delivery-contract.md
 PASS Link exists 12-development-plan.md -> ../design/edition-03-review.md
 PASS Link exists 12-development-plan.md -> 17-personal-ai-intelligent-ui.md
+PASS Link exists 12-development-plan.md -> ../implementation/phase1-review.md
 PASS Link exists 14-artifact-content-contracts.md -> 16-delivery-contract.md
 PASS Link exists 09-workflows-and-agents.md -> workflow-templates.json
 PASS Link exists 09-workflows-and-agents.md -> 14-artifact-content-contracts.md

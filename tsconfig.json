@@ -1,0 +1,1 @@
+{"compilerOptions":{"target":"ES2022","module":"NodeNext","moduleResolution":"NodeNext","lib":["ES2023","DOM"],"jsx":"react-jsx","strict":true,"esModuleInterop":true,"skipLibCheck":true,"noEmit":true,"allowJs":true},"include":["apps/**/*.ts","apps/**/*.tsx","packages/**/*.ts","tests/**/*.ts"]}

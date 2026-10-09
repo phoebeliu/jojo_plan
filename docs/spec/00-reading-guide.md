@@ -41,3 +41,7 @@ JP-1.1 重点先看 [新交互设计](04-ux-spec.md) 与 [扩展协议](15-conve
 ## S2补充（2026-10-09）
 
 2026-10-09最新补充：[S2研究与定位](../strategy/07-personal-ai-intelligent-ui.md)、[Personal AI与Intelligent UI规格](17-personal-ai-intelligent-ui.md)、[Edition04设计审阅](../design/edition-04-review.md)。基础JP-1.1不变；S2新增存储/命令未纳入原SQL/API Schema，实施前须版本化扩展。
+
+## 2026-10-09实施更新
+
+当前实现与验收见[原生应用入口](../implementation/README.md)和[实际阶段报告](../implementation/phase1-review.md)。v2第一阶段31命令与旧v1完整52命令分开。

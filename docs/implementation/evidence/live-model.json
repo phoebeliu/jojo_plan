@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-09T10:30:39.473Z",
+  "runtime": "Pi Agent Core + logged-in local Codex, tool-less read-only ephemeral",
+  "checks": [
+    {
+      "name": "真实模型产出与可定位结构依据",
+      "pass": true
+    },
+    {
+      "name": "合成任务预设语义与格式约定",
+      "pass": true
+    },
+    {
+      "name": "用户入口版本绑定审阅",
+      "pass": true
+    },
+    {
+      "name": "退出重开后要求、成果、审批均恢复",
+      "pass": true
+    },
+    {
+      "name": "变更原子失效旧检查和审批效力",
+      "pass": true
+    },
+    {
+      "name": "旧审批请求被拒绝",
+      "pass": true
+    },
+    {
+      "name": "按新要求真实重验，保留旧版本",
+      "pass": true
+    },
+    {
+      "name": "可导出版本、校验和与交接清单",
+      "pass": true
+    }
+  ],
+  "workId": "da950dc7-61a7-47e9-92cd-662e4833c3cd",
+  "fingerprint": "e576e8d2bd5b82b0f194dbd748f8dc235f707c5c16825ebd4b98f588b2e09004",
+  "modelConfiguration": "existing CLI default; not silently overridden",
+  "actualUsage": [
+    {
+      "input_tokens": 10512,
+      "output_tokens": 340,
+      "state": "settled"
+    },
+    {
+      "input_tokens": 10535,
+      "output_tokens": 368,
+      "state": "settled"
+    }
+  ],
+  "status": "passed"
+}

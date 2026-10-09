@@ -1,0 +1,65 @@
+{
+  "name": "jojo-plan",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/main.cjs",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "npm run build && electron .",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/core/*.test.ts",
+    "package": "npm run build && electron-builder --mac dir zip --arm64",
+    "test:desktop": "npm run build && node tests/desktop.cjs",
+    "format": "prettier --write apps packages scripts tests"
+  },
+  "build": {
+    "appId": "com.jojoplan.desktop",
+    "productName": "Jojo Plan",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "packages/storage/migrations",
+        "to": "migrations"
+      }
+    ],
+    "mac": {
+      "identity": null,
+      "target": [
+        "dir",
+        "zip"
+      ],
+      "minimumSystemVersion": "14.0",
+      "icon": "apps/desktop/assets/icon.icns"
+    },
+    "electronDist": "node_modules/electron/dist"
+  },
+  "dependencies": {
+    "@mariozechner/pi-agent-core": "0.73.1",
+    "@mariozechner/pi-ai": "0.73.1",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "fflate": "0.8.3",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.4",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "electron": "44.7.0",
+    "electron-builder": "26.15.3",
+    "esbuild": "0.28.2",
+    "prettier": "3.9.9",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2"
+  },
+  "description": "Personal delivery workspace for AI project owners",
+  "author": "Jojo Plan"
+}

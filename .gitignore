@@ -1,1 +1,6 @@
 /output/playwright/
+/node_modules/
+/dist/
+/release/
+/output/acceptance/
+*.tsbuildinfo

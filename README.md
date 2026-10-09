@@ -2,7 +2,7 @@
 
 AI 项目负责人的个人交付替身：按你认可的方法组织工作，用可追溯的依据验收，并提供适合当前任务的交互。个人化与效率优势仍待真实任务验证。
 
-当前成果是 **JP-1.1 开发交接文档包**，不是已实现的应用。
+当前已有 **Jojo Plan 0.1.0 第一阶段原生开发验收版**。完整产品文档为JP-1.1＋S2；已实现范围见[运行入口](docs/implementation/README.md)。
 
 - [开发交接包：阅读入口](docs/spec/00-reading-guide.md)
 - [需要用户拍板的默认方案](docs/spec/01-owner-decisions.md)
@@ -23,3 +23,5 @@ AI 项目负责人的个人交付替身：按你认可的方法组织工作，�
 2026-10-08：最新设计为 **Design Edition 03**。交付状态常驻，依据可定位到版本与样本，变更可预演，交接清单与缺口一起查看。入口仍为[交互设计稿](docs/design/screenboard.html)，详见[本轮设计审阅](docs/design/edition-03-review.md)。
 
 2026-10-09：最新定位为 **S2 Personal Delivery AI**，设计为 **Edition 04**。[最新研究与护城河机制](docs/strategy/07-personal-ai-intelligent-ui.md) · [实施补充规格](docs/spec/17-personal-ai-intelligent-ui.md)。新增个人准则、经验候选和可解释情境推荐；目前是确定性的静态演示，尚无真实长期学习或持久记忆。
+
+2026-10-09：[实际阶段验收](docs/implementation/phase1-review.md)，包括真实模型、退出恢复、变更失效与打包后App实测。安装包在release/，二进制不提交源码Git。
