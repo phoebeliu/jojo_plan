@@ -1,0 +1,38 @@
+{
+  "version": "0.2.0",
+  "date": "2026-10-10",
+  "sourceCommit": "499112a17487f69d1cfae8e552e2aa7988e62ff4",
+  "build": "macOS arm64 local-trial MVP, not notarized",
+  "installer": {
+    "path": "release/Jojo Plan-0.2.0-arm64-mac.zip",
+    "bytes": 142088074,
+    "sha256": "36810e7c72767c1cc7385310a7f0d7468b05cda19b9473ca1db0687aa8a6d2a5"
+  },
+  "exampleSystem": {
+    "path": "deliverables/jojo-plan-0.2.0-example-system.zip",
+    "sha256": "d6ed933c482befb8d0f4cd38b504c23a1ace8e0505390cabf14ba0d3dfc46156",
+    "synthetic": true,
+    "tests": 6
+  },
+  "evidence": {
+    "domainAndProtocolTests": 23,
+    "systemAndSkillChecks": 22,
+    "documentChecks": 4,
+    "sourceChecks": 3,
+    "containerBoundaryTests": 3,
+    "packagedLegacyChecks": 6,
+    "packagedMvpChecks": 6
+  },
+  "scope": "Text/Skill delivery plus seven-stage no-dependency Node.js Web/API teams; public source reads; explicit personal context and controlled UI",
+  "limits": [
+    "No automatic search discovery/OCR or complex document parsing",
+    "No arbitrary tech stacks/production deployment",
+    "Real suppliers, target macOS14/Intel/clean machine and Apple signing not verified"
+  ],
+  "installedPreviewUpdated": false,
+  "sourceArchive": {
+    "path": "deliverables/jojo-plan-0.2.0-source-and-docs.zip",
+    "bytes": 5251548,
+    "sha256": "5e77903e96c3b4cc4aa33cb8867dea74e02058ca23e6f982e5bf5f2aceaa0682"
+  }
+}
