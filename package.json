@@ -1,6 +1,6 @@
 {
   "name": "jojo-plan",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "main": "dist/main.cjs",
@@ -11,7 +11,10 @@
     "test": "node --import tsx --test tests/core/*.test.ts",
     "package": "npm run build && electron-builder --mac dir zip --arm64",
     "test:desktop": "npm run build && node tests/desktop.cjs",
-    "format": "prettier --write apps packages scripts tests"
+    "format": "prettier --write apps packages scripts tests",
+    "test:mvp": "node --import tsx scripts/acceptance-mvp.ts",
+    "test:sources": "node --import tsx scripts/acceptance-sources.ts",
+    "test:desktop:mvp": "npm run build && node tests/desktop-mvp.cjs"
   },
   "build": {
     "appId": "com.jojoplan.desktop",

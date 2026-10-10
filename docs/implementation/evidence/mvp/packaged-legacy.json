@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-10T08:20:30.413Z",
+  "scope": "Actual Electron + synthetic live-model dataset",
+  "checks": [
+    {
+      "name": "Installed renderer is sandboxed, isolated, with restricted bridge",
+      "pass": true
+    },
+    {
+      "name": "Live artifacts and approval restored into native app",
+      "pass": true
+    },
+    {
+      "name": "Native personal controls have real persistent source records",
+      "pass": true
+    },
+    {
+      "name": "Requirements change invalidates native approval controls",
+      "pass": true
+    },
+    {
+      "name": "Application restart preserves changed goal and personal rules",
+      "pass": true
+    },
+    {
+      "name": "Native modal focus and compact window remain usable",
+      "pass": true
+    }
+  ],
+  "status": "passed"
+}

@@ -58,7 +58,7 @@ export class PiRuntime implements Runtime {
       initialState: {
         model,
         systemPrompt:
-          "你是Jojo的交付写作Agent。仅根据明确提供的要求与材料写作。不要读取文件、调用工具、编造来源或实测结果。输出Markdown正文；涵盖用户要求的章节，明确假设与局限。",
+          "你是Jojo交付团队中的当前角色。按当前阶段约定生成成果，仅根据明确提供的要求与材料工作。不要读取宿主文件、调用工具、编造来源或实测结果。输出Markdown正文；涵盖用户要求的章节，明确假设与局限。源码由受控容器runner验证，未见真实日志不能声称已测试。",
         tools: [],
       },
       getApiKey: () => key,

@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-10T08:20:37.985Z",
+  "scope": "Native Electron / synthetic file / no model call",
+  "checks": [
+    {
+      "name": "native first-work form creates system workspace with seven related stages",
+      "pass": true
+    },
+    {
+      "name": "native file import stores selected UTF-8 material, not arbitrary renderer paths",
+      "pass": true
+    },
+    {
+      "name": "manual source captures origin and Markdown is safely rendered",
+      "pass": true
+    },
+    {
+      "name": "conversation supplement is visible without inventing agent jobs",
+      "pass": true
+    },
+    {
+      "name": "work, materials and conversation recover after native app restart",
+      "pass": true
+    },
+    {
+      "name": "MVP native renderer stays error free",
+      "pass": true
+    }
+  ]
+}

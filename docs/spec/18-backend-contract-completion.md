@@ -31,3 +31,15 @@ UI、模型输出和静态检查都不能自动做业务通过判断：确定性
 003迁移增加消息purpose和准则适用类型。任务补充绑定实际attempt；准则来源不当作普通补充回送。上下文预览即使同requestId也重查可用准则；其他幂等写入返回原响应。审批指纹包含输入、成果及检查版本。
 
 响应包络机器规范见[response.schema.json](../../packages/contracts/response.schema.json)。各方法实体结果按持久模型与源码投影返回；此Schema严格验证成功/错误包络，不冒充已经描述所有完整产品DTO。源码与实体输出映射见运行说明。
+
+## 0.2.0 MVP 增量（2026-10-10）
+
+同一schemaVersion=2增加material.import、material.fetch、skill.attach、system.rework，共35命令；work.start新增可选allowContainer=true，研发阶段强制检查此授权。完整机器契约见packages/contracts/phase1.schema.json，源码生成器为contract-source.mjs。
+
+无需改动已发布三次SQLite迁移：材料与角色阶段结果使用artifact/version及不可变metadata；来源读取记录真实task/attempt/tool_operation/process。审批反馈用受信任消息attachments_json标记，仍遵守purpose原枚举，从普通补充输入指纹中排除。新材料/普通补充进入输入指纹；二者皆空时保留0.1.0原指纹，避免无要求变化的升级失效。
+
+system.nextStage由当前输入指纹下已批准有效基线决定，七阶段按顺序推进。system.rework只能回到已经到达的阶段，失效该阶段及后续依据；不自动跳审。各阶段模型、真实检查和日志记入原持久工作树。正文/Skill门槛属于结构检查，系统研发增加源码合同及真实容器TAP门槛；所有最终语义/业务批准仍是用户动作。
+
+源码导出从implementation的document成果取files，不能误取同阶段更晚test_evidence。固定Dockerfile只COPY合法路径文本源码，基础镜像按摘要锁定，运行无host mount/socket、无网络、非root、只读、资源/时间受限。网页读取限定公共HTTPS，DNS地址校验后固定连接IP，逐次重定向重新校验，1MB下载上限、静态正文截断与失败提示；不能冒充自动搜索发现或浏览器会话访问。
+
+实际验收和边界以docs/implementation/mvp-review.md为准。该增量不会把原v1所有领域、能力供应商与生产集成工作包标记为完成。

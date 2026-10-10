@@ -12,6 +12,7 @@ import {
 } from "node:fs";
 import { join } from "node:path";
 import { zipSync, strToU8 } from "fflate";
+import { stages, parseFiles, skillCheck } from "./delivery.js";
 export const uid = () => randomUUID(),
   now = () => new Date().toISOString();
 export const digest = (v: unknown) =>
@@ -239,13 +240,23 @@ export class Store {
   inputFingerprint(workId: string) {
     const w = this.work(workId),
       c = this.contract(workId);
+    const sources = this.all(
+      "SELECT v.id FROM artifact_version v JOIN artifact a ON a.id=v.artifact_id WHERE a.work_id=? AND a.kind='source_material' ORDER BY v.rowid",
+      workId,
+    ).map((v) => v.id);
+    const supplements = this.all(
+      "SELECT m.id FROM conversation_message m JOIN conversation c ON c.id=m.conversation_id WHERE c.work_id=? AND m.purpose='supplement' AND coalesce(json_extract(m.attachments_json,'$[0].kind'),'')<>'review-feedback' ORDER BY m.seq",
+      workId,
+    ).map((v) => v.id);
     return digest({
       workId,
       revision: w.revision,
       goal: w.goal,
       contract: c?.id,
+      ...(sources.length || supplements.length ? { sources, supplements } : {}),
     });
   }
+
   fingerprint(workId: string) {
     const input = this.inputFingerprint(workId);
     const output = this.one(
@@ -340,10 +351,16 @@ export class Store {
       sender,
       attemptId,
       text,
-      "[]",
+      JSON.stringify(
+        purpose === "review-feedback" ? [{ kind: "review-feedback" }] : [],
+      ),
       sender === "user" ? "accepted" : "final",
       now(),
-      sender === "agent" ? "output" : purpose,
+      sender === "agent"
+        ? "output"
+        : purpose === "review-feedback"
+          ? "supplement"
+          : purpose,
     );
     return id;
   }
@@ -381,6 +398,8 @@ export class Store {
       work: w,
       fingerprint: fp,
       contract: this.contract(workId),
+      stage: this.nextStage(workId),
+      stages: stages[w.kind as keyof typeof stages],
       messages: this.all(
         "SELECT m.* FROM conversation_message m JOIN conversation c ON c.id=m.conversation_id WHERE c.work_id=? ORDER BY seq",
         workId,
@@ -639,10 +658,10 @@ export class Store {
     );
     const suggested = live
       ? live.component
-      : stale
-        ? "change"
-        : w.state === "delivered"
-          ? "handoff"
+      : w.state === "delivered"
+        ? "handoff"
+        : stale && w.state === "blocked"
+          ? "change"
           : w.state === "draft"
             ? "scope"
             : w.kind === "skill"
@@ -736,6 +755,56 @@ export class Store {
     });
     return this.work(w.id);
   }
+  nextStage(workId: string) {
+    const w = this.work(workId),
+      plan = stages[w.kind as keyof typeof stages];
+    if (w.kind !== "system") return plan[0];
+    const approved = new Set(
+      this.all(
+        "SELECT v.metadata_json FROM baseline b JOIN baseline_member m ON m.baseline_id=b.id JOIN artifact_version v ON v.id=m.version_id JOIN artifact a ON a.id=v.artifact_id WHERE a.work_id=? AND b.status='approved' AND b.valid=1 AND m.purpose='output'",
+        workId,
+      )
+        .map((v) => JSON.parse(v.metadata_json))
+        .filter((m) => m.inputFingerprint === this.inputFingerprint(workId))
+        .map((m) => m.stage),
+    );
+    return plan.find((stage) => !approved.has(stage.id)) || plan.at(-1)!;
+  }
+  importMaterial(
+    workId: string,
+    name: string,
+    text: string,
+    origin: string,
+    selectedSkillVersionId: string | null = null,
+  ) {
+    const w = this.work(workId);
+    if (w.state === "active")
+      fail("REVISION_CONFLICT", "请暂停后再改变材料，避免运行混入新输入");
+    const id = this.artifact(
+      workId,
+      "source_material",
+      name,
+      text,
+      {
+        origin,
+        importedAt: now(),
+        parser: "utf8-text/1",
+        selectedSkillVersionId,
+      },
+      "user",
+    );
+    this.run(
+      "UPDATE baseline SET valid=0 WHERE stage_id IN (SELECT s.id FROM stage_run s JOIN workflow_run r ON r.id=s.run_id WHERE r.work_id=?)",
+      workId,
+    );
+    this.run(
+      "UPDATE work_item SET revision=revision+1,state='blocked',updated_at=? WHERE id=?",
+      now(),
+      workId,
+    );
+    this.event("material.imported", w.project_id, workId, { versionId: id });
+    return { versionId: id };
+  }
   decide(p: any) {
     const w = this.work(p.workId);
     if (this.fingerprint(w.id) !== p.fingerprint)
@@ -746,6 +815,8 @@ export class Store {
       p.fingerprint,
     );
     if (!b || !b.sealed_at) fail("STALE_BASELINE", "当前版本尚未完成检查");
+    if (b.status !== "draft")
+      fail("REVISION_CONFLICT", "此版本已作出审阅决定，请生成新版本或修改要求");
     for (const member of this.all(
       "SELECT version_id FROM baseline_member WHERE baseline_id=?",
       b.id,
@@ -766,15 +837,31 @@ export class Store {
       p.verdict === "approve" ? "approved" : "rejected",
       b.id,
     );
+    const stageId = this.one(
+      "SELECT stage_key FROM stage_run WHERE id=?",
+      b.stage_id,
+    ).stage_key;
+    const final = w.kind !== "system" || stageId === "final-review";
+    this.run(
+      "UPDATE stage_run SET state=? WHERE id=?",
+      p.verdict === "approve" ? "passed" : "rework",
+      b.stage_id,
+    );
+    if (p.verdict === "request_changes")
+      this.message(w.id, "user", p.reason, null, "review-feedback");
     this.run(
       "UPDATE work_item SET state=?,updated_at=? WHERE id=?",
-      p.verdict === "approve" ? "delivered" : "blocked",
+      p.verdict === "approve" ? (final ? "delivered" : "paused") : "blocked",
       now(),
       w.id,
     );
     this.run(
       "UPDATE workflow_run SET state=? WHERE id=?",
-      p.verdict === "approve" ? "delivered" : "waiting_input",
+      p.verdict === "approve"
+        ? final
+          ? "delivered"
+          : "waiting_input"
+        : "waiting_input",
       this.one("SELECT run_id FROM stage_run WHERE id=?", b.stage_id).run_id,
     );
     return this.work(w.id);
@@ -912,10 +999,45 @@ export class Store {
       files[name] = strToU8(a.text);
       manifest.files.push({
         path: name,
+        title: a.title,
+        kind: a.kind,
+        stage: a.metadata.stage || null,
         versionId: a.id,
         sha256: a.object_hash,
       });
     }
+    files["README.md"] = strToU8(`# ${d.work.name}\n\n状态：${d.work.state}。当前指纹：${d.fingerprint}\n\n目标：${d.work.goal}\n\n${manifest.openItems.join("\n")}\n\n## 成果与依据\n\n${manifest.files.map((f: any) => `- [${f.title}${f.stage ? " · " + f.stage : ""}](${f.path})`).join("\n")}\n\n完整版本与校验和见 handoff.json。历史和失效成果保留，不能用其代替当前验收依据。系统源代码在 system/，启动与局限见 system/README.md（如提供）；Skill 在 skills/，文档在 document.md。\n`);
+    const output = d.artifacts
+      .filter(
+        (a: any) =>
+          ["document", "skill"].includes(a.kind) &&
+          a.metadata.inputFingerprint === this.inputFingerprint(workId),
+      )
+      .at(-1);
+    if (output && d.work.kind === "skill" && skillCheck(output.text)) {
+      const name = /^name:\s*([a-z][a-z0-9-]*)/m.exec(output.text)![1];
+      files[`skills/${name}/SKILL.md`] = strToU8(output.text);
+    }
+    if (d.work.kind === "system") {
+      const code = d.artifacts
+        .filter(
+          (a: any) =>
+            a.kind === "document" &&
+            a.metadata.stage === "implementation" &&
+            a.metadata.inputFingerprint === this.inputFingerprint(workId),
+        )
+        .at(-1);
+      if (code) {
+        try {
+          for (const f of parseFiles(code.text))
+            files["system/" + f.path] = strToU8(f.content);
+        } catch {
+          manifest.openItems.push("源码格式未通过检查");
+        }
+      }
+    }
+    if (output && d.work.kind === "document")
+      files["document.md"] = strToU8(output.text);
     files["handoff.json"] = strToU8(JSON.stringify(manifest, null, 2));
     files["memories.json"] = strToU8(
       JSON.stringify(

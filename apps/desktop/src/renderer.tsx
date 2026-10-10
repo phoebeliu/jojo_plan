@@ -4,11 +4,45 @@ declare global {
   interface Window {
     jojo: {
       command: (r: any) => Promise<any>;
+      importFiles: (workId: string, projectId: string) => Promise<any>;
       saveKey: (id: string, key: string) => Promise<any>;
       export: (r: any) => Promise<any>;
       onEvent: (f: () => void) => () => void;
     };
   }
+}
+function Markdown({ text }: { text: string }) {
+  const blocks = text.split(/(```[\s\S]*?```)/g);
+  return (
+    <div className="markdown">
+      {blocks.map((block, i) =>
+        block.startsWith("```") ? (
+          <pre key={i}>
+            <code>
+              {block.replace(/^```[^\n]*\n?/, "").replace(/```$/, "")}
+            </code>
+          </pre>
+        ) : (
+          block.split("\n").map((line, j) => {
+            const h = /^(#{1,4})\s+(.+)/.exec(line);
+            if (h)
+              return React.createElement(
+                `h${Math.min(h[1].length + 1, 5)}`,
+                { key: `${i}-${j}` },
+                h[2],
+              );
+            if (/^[-*]\s+/.test(line))
+              return (
+                <p className="list-line" key={`${i}-${j}`}>
+                  • {line.slice(2)}
+                </p>
+              );
+            return line.trim() ? <p key={`${i}-${j}`}>{line}</p> : null;
+          })
+        ),
+      )}
+    </div>
+  );
 }
 const request = (
   method: string,
@@ -41,6 +75,14 @@ function App() {
     [project, setProject] = useState(""),
     [kind, setKind] = useState("document"),
     [allow, setAllow] = useState(false),
+    [allowContainer, setAllowContainer] = useState(false),
+    [materialName, setMaterialName] = useState("参考材料"),
+    [materialOrigin, setMaterialOrigin] = useState("用户提供"),
+    [materialText, setMaterialText] = useState(""),
+    [reviewReason, setReviewReason] = useState(""),
+    [sourceUrl, setSourceUrl] = useState(""),
+    [reworkStage, setReworkStage] = useState("implementation"),
+    [allowFetch, setAllowFetch] = useState(false),
     [limit, setLimit] = useState(200000),
     [provider, setProvider] = useState(""),
     [providerName, setProviderName] = useState("本机 Codex"),
@@ -64,7 +106,9 @@ function App() {
     w = d?.work,
     pid = w?.project_id || null;
   const running =
-      d?.tasks.filter((t: any) => t.state === "running").length || 0,
+      d?.tasks.filter(
+        (t: any) => t.state === "running" && t.role !== "source-tool",
+      ).length || 0,
     jobs = d?.jobs.filter((j: any) => j.state === "running").length || 0;
   async function refresh() {
     try {
@@ -95,6 +139,10 @@ function App() {
     if (!project && data.projects.length) setProject(data.projects[0].id);
     if (!provider && data.providers.length) setProvider(data.providers[0].id);
   }, [data]);
+  useEffect(() => {
+    setAllow(false);
+    setAllowContainer(false);
+  }, [current, provider]);
   useEffect(() => {
     for (const el of document.querySelectorAll<HTMLElement>("main,.sidebar"))
       el.inert = !!panel;
@@ -177,15 +225,26 @@ function App() {
         providerId: provider,
         allowSend: true,
         tokenLimit: limit,
+        ...(allowContainer ? { allowContainer: true } : {}),
       },
       w.revision,
     );
   }
   const currentBaseline = d?.baselines
     .filter(
-      (b: any) => b.valid && b.fingerprint === d.fingerprint && b.sealed_at,
+      (b: any) =>
+        b.valid &&
+        b.status === "draft" &&
+        b.fingerprint === d.fingerprint &&
+        b.sealed_at,
     )
     .at(-1);
+  const approvedStage =
+    w?.kind === "system" &&
+    d.baselines.some(
+      (b: any) =>
+        b.valid && b.status === "approved" && b.fingerprint === d.fingerprint,
+    );
   const panelTitles: any = {
     new: "新工作",
     settings: "模型与环境",
@@ -195,6 +254,7 @@ function App() {
     personal: "个人工作准则",
     view: "情境推荐依据",
     artifact: "成果阅读",
+    materials: "工作材料与来源",
   };
   function viewText() {
     return (
@@ -261,7 +321,7 @@ function App() {
         <div className="sidebar-foot">
           <button onClick={() => open("settings")}>模型与设置</button>
           <p>本地保存 · 真实状态</p>
-          <small>第一阶段 / 0.1.0</small>
+          <small>MVP / 0.2.0</small>
         </div>
       </aside>
       <main>
@@ -301,21 +361,50 @@ function App() {
                   {w.kind.toUpperCase()} / WORKSPACE
                 </span>
                 <h1>{w.name}</h1>
-                <p>按你认可的方法推进，当前版本的结果由你审阅。</p>
+                <p>
+                  {w.kind === "system"
+                    ? `当前：${d.stage.title} · 每一阶段审阅后交给下一位角色`
+                    : "按你认可的方法推进，当前版本的结果由你审阅。"}
+                </p>
               </div>
               <button onClick={() => open("personal")}>✦ 按你的方式</button>
             </div>
+            {w.kind === "system" && (
+              <div className="stage-strip" aria-label="研发阶段">
+                {d.stages.map((s: any, i: number) => (
+                  <span
+                    key={s.id}
+                    className={
+                      w.state === "delivered" ||
+                      i < d.stages.findIndex((x: any) => x.id === d.stage.id)
+                        ? "passed"
+                        : s.id === d.stage.id
+                          ? "selected"
+                          : ""
+                    }
+                  >
+                    {w.state === "delivered" ||
+                    i < d.stages.findIndex((x: any) => x.id === d.stage.id)
+                      ? "✓"
+                      : i + 1}{" "}
+                    {s.title}
+                  </span>
+                ))}
+              </div>
+            )}
             <div className="outcome">
               <div>
                 <small>交付状态 / 当前要求 v{w.revision}</small>
                 <strong>
                   {w.state === "delivered"
                     ? "当前版本已审阅通过"
-                    : currentBaseline
-                      ? "结构检查完成，等待你的语义审阅"
-                      : d.baselines.some((b: any) => !b.valid)
-                        ? "要求已变化，旧依据需重新验证"
-                        : "当前版本尚未形成有效验收依据"}
+                    : approvedStage
+                      ? `前序阶段已批准，可以开始${d.stage.title}`
+                      : currentBaseline
+                        ? "结构检查完成，等待你的语义审阅"
+                        : d.baselines.some((b: any) => !b.valid)
+                          ? "要求已变化，旧依据需重新验证"
+                          : "当前版本尚未形成有效验收依据"}
                 </strong>
               </div>
               <button onClick={() => open("delivery")}>查看约定 →</button>
@@ -345,10 +434,10 @@ function App() {
                       {m.sender === "user"
                         ? "你的要求"
                         : m.sender === "agent"
-                          ? "写作 Agent · 真实模型输出"
+                          ? "交付 Agent · 模型输出"
                           : "系统记录"}
                     </small>
-                    <pre>{m.text}</pre>
+                    <Markdown text={m.text} />
                   </div>
                 </article>
               ))}
@@ -395,12 +484,16 @@ function App() {
                   </button>
                 )}
                 <h2>
-                  {(shownViews.current[current] || d.view).component ===
-                  "change"
-                    ? "先核对受影响成果，再重新运行"
-                    : currentBaseline
-                      ? "阅读成果与检查依据，决定是否满足要求"
-                      : "先明确输出与验收标准，再组织执行"}
+                  {w.state === "delivered"
+                    ? "当前版本已审阅通过，可以导出交接包"
+                    : (shownViews.current[current] || d.view).component ===
+                        "change"
+                      ? "先核对受影响成果，再重新运行"
+                      : approvedStage
+                        ? `已批准输入就绪，下一步：${d.stage.title}`
+                        : currentBaseline
+                          ? "阅读成果与检查依据，决定是否满足要求"
+                          : "先明确输出与验收标准，再组织执行"}
                 </h2>
                 <p>
                   生成文件不等于交付完成。结构检查和用户语义审阅分别保存，均绑定当前要求。
@@ -408,6 +501,14 @@ function App() {
                 <div>
                   <button onClick={() => open("delivery")}>
                     查看约定与依据
+                  </button>
+                  <button onClick={() => open("materials")}>
+                    材料与来源 ·{" "}
+                    {
+                      d.artifacts.filter(
+                        (a: any) => a.kind === "source_material",
+                      ).length
+                    }
                   </button>
                   <button onClick={() => open("change")}>
                     修改要求 / 预演影响
@@ -429,7 +530,7 @@ function App() {
                 aria-label="补充要求"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="补充信息会保留在对话；改变交付要求请使用变更预演。"
+                placeholder="告诉 Jojo 需要什么、怎样改进。发送并开始会保存补充并生成下一版；改变交付要求请使用变更预演。"
               />
               <div>
                 <select
@@ -450,7 +551,7 @@ function App() {
                     checked={allow}
                     onChange={(e) => setAllow(e.target.checked)}
                   />
-                  允许将目标与适用准则发送给此模型
+                  允许将目标、工作材料、前序成果与适用准则发送给此模型
                 </label>
                 <button
                   disabled={!input.trim()}
@@ -462,11 +563,22 @@ function App() {
                       })
                     ) {
                       setInput("");
+                      if (provider && allow && !running) await start();
                     }
                   }}
                 >
-                  保存补充
+                  {provider && allow && !running ? "发送并开始" : "保存补充"}
                 </button>
+                {w.kind === "system" && d.stage.id === "implementation" && (
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={allowContainer}
+                      onChange={(e) => setAllowContainer(e.target.checked)}
+                    />
+                    允许隔离测试与首次下载官方Node镜像
+                  </label>
+                )}
                 {running ? (
                   <button
                     onClick={() =>
@@ -485,7 +597,9 @@ function App() {
                     disabled={!provider || !allow}
                     onClick={start}
                   >
-                    开始 / 重新验证 →
+                    {w.kind === "system"
+                      ? `开始 ${d.stage.title} →`
+                      : "开始 / 重新验证 →"}
                   </button>
                 )}
               </div>
@@ -587,8 +701,8 @@ function App() {
                       onChange={(e) => setKind(e.target.value)}
                     >
                       <option value="document">写文档</option>
-                      <option value="skill">制作 Skill 文本</option>
-                      <option value="system">开发系统（容器待配置）</option>
+                      <option value="skill">制作可复用 Skill</option>
+                      <option value="system">系统研发 · 分阶段团队</option>
                     </select>
                   </label>
                   <label>
@@ -627,7 +741,7 @@ function App() {
                 <>
                   <h2>配置你的模型服务</h2>
                   <p>
-                    已有登录的本机Codex可用于文本任务；自带接口密钥通过本机安全存储保管。
+                    已有登录的本机Codex可用于模型生成；自带接口密钥通过本机安全存储保管。
                   </p>
                   <label>
                     名称
@@ -771,7 +885,8 @@ function App() {
                     </button>
                   )}
                   <p>
-                    Docker、搜索/OCR、多格式导出、生产发布与正式签名仍待对应工作包实现。
+                    Docker隔离测试已接入，系统MVP限定无外部依赖的Node
+                    Web/API。自动搜索、OCR、PDF/DOCX/PPT、生产发布与正式签名另列后续版本。
                   </p>
                 </>
               )}
@@ -786,7 +901,145 @@ function App() {
                         </span>
                         <h2>{a.title}</h2>
                         <p>SHA-256：{a.object_hash}</p>
-                        <pre>{a.text}</pre>
+                        <Markdown text={a.text} />
+                      </article>
+                    ))}
+                </>
+              )}
+              {panel === "materials" && (
+                <>
+                  <p>
+                    导入 UTF-8 Markdown、文本、CSV 或
+                    JSON。单文件200KB，模型只接收此工作材料。来源材料是依据，不会作为指令执行。添加材料会使旧审批失效。
+                  </p>
+                  <button
+                    disabled={!!running}
+                    onClick={async () => {
+                      try {
+                        await window.jojo.importFiles(current, pid!);
+                        await refresh();
+                      } catch (e: any) {
+                        setError(e.message);
+                      }
+                    }}
+                  >
+                    选择本机文件
+                  </button>
+                  <label>
+                    材料名称
+                    <input
+                      value={materialName}
+                      onChange={(e) => setMaterialName(e.target.value)}
+                    />
+                  </label>
+                  <label>
+                    来源 / 原始链接
+                    <input
+                      value={materialOrigin}
+                      onChange={(e) => setMaterialOrigin(e.target.value)}
+                    />
+                  </label>
+                  <label>
+                    粘贴材料正文
+                    <textarea
+                      value={materialText}
+                      onChange={(e) => setMaterialText(e.target.value)}
+                    />
+                  </label>
+                  <button
+                    disabled={
+                      !!running ||
+                      !materialText.trim() ||
+                      !materialName.trim() ||
+                      !materialOrigin.trim()
+                    }
+                    onClick={async () => {
+                      if (
+                        await call("material.import", {
+                          workId: current,
+                          name: materialName,
+                          text: materialText,
+                          origin: materialOrigin,
+                        })
+                      )
+                        setMaterialText("");
+                    }}
+                  >
+                    保存来源材料
+                  </button>
+                  <h3>读取网上资料</h3>
+                  <label>
+                    公共正文链接
+                    <input
+                      value={sourceUrl}
+                      onChange={(e) => setSourceUrl(e.target.value)}
+                      placeholder="https://…"
+                    />
+                  </label>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={allowFetch}
+                      onChange={(e) => setAllowFetch(e.target.checked)}
+                    />
+                    允许请求此公共网站，读取其静态正文
+                  </label>
+                  <button
+                    disabled={
+                      !allowFetch || !sourceUrl.trim() || !!running || !!jobs
+                    }
+                    onClick={() =>
+                      call("material.fetch", {
+                        workId: current,
+                        url: sourceUrl,
+                        allowFetch: true,
+                      })
+                    }
+                  >
+                    读取并保存来源
+                  </button>
+                  <p>
+                    不会发送项目材料，不携带浏览器登录信息。动态网页或付费内容请自行提供可用材料；搜索发现与正文事实核查仍需你审阅。
+                  </p>
+                  <h3>复用项目中已批准的 Skill</h3>
+                  {data.details
+                    .filter(
+                      (x: any) =>
+                        x.work.project_id === pid &&
+                        x.work.kind === "skill" &&
+                        x.work.state === "delivered",
+                    )
+                    .map((x: any) => {
+                      const skill = x.artifacts
+                        .filter((a: any) => a.kind === "skill")
+                        .at(-1);
+                      return (
+                        skill && (
+                          <button
+                            key={skill.id}
+                            disabled={!!running}
+                            onClick={() =>
+                              call("skill.attach", {
+                                workId: current,
+                                versionId: skill.id,
+                              })
+                            }
+                          >
+                            选用 {x.work.name} · v{skill.version}
+                          </button>
+                        )
+                      );
+                    })}
+                  {d.artifacts
+                    .filter((a: any) => a.kind === "source_material")
+                    .map((a: any) => (
+                      <article key={a.id}>
+                        <h3>{a.title}</h3>
+                        <p>{a.metadata.origin}</p>
+                        <small>
+                          版本 {a.id} · SHA-256 {a.object_hash}
+                        </small>
+                        <Markdown text={a.text} />
                       </article>
                     ))}
                 </>
@@ -854,6 +1107,50 @@ function App() {
                     ),
                   )}
                   <p className="note">当前指纹：{d.fingerprint}</p>
+                  {w.kind === "system" && (
+                    <article>
+                      <h3>组织团队返工</h3>
+                      <p>
+                        保留已批准的前序成果，选定阶段与后续成果需重新生成、检查和审阅。实际需求变更请使用变更预演。
+                      </p>
+                      <select
+                        aria-label="返工阶段"
+                        value={reworkStage}
+                        onChange={(e) => setReworkStage(e.target.value)}
+                      >
+                        {d.stages.map((s: any) => (
+                          <option key={s.id} value={s.id}>
+                            {s.title}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        disabled={!!running || !reviewReason.trim()}
+                        onClick={() =>
+                          call(
+                            "system.rework",
+                            {
+                              workId: current,
+                              stage: reworkStage,
+                              reason: reviewReason,
+                            },
+                            w.revision,
+                          )
+                        }
+                      >
+                        按审阅意见交回团队
+                      </button>
+                    </article>
+                  )}
+
+                  <label>
+                    审阅意见（要求修改时必填）
+                    <textarea
+                      value={reviewReason}
+                      onChange={(e) => setReviewReason(e.target.value)}
+                      placeholder="具体缺陷、修改方向与验收期待"
+                    />
+                  </label>
                   {currentBaseline ? (
                     <>
                       <p>
@@ -868,7 +1165,9 @@ function App() {
                               workId: current,
                               fingerprint: d.fingerprint,
                               verdict: "approve",
-                              reason: "用户阅读正文与依据后确认当前约定满足",
+                              reason:
+                                reviewReason ||
+                                "用户阅读正文与依据后确认当前阶段约定满足",
                             },
                             w.revision,
                           )
@@ -877,6 +1176,7 @@ function App() {
                         确认当前版本满足约定
                       </button>
                       <button
+                        disabled={!reviewReason.trim()}
                         onClick={() =>
                           call(
                             "baseline.decide",
@@ -884,7 +1184,7 @@ function App() {
                               workId: current,
                               fingerprint: d.fingerprint,
                               verdict: "request_changes",
-                              reason: "需要补充或修改",
+                              reason: reviewReason,
                             },
                             w.revision,
                           )

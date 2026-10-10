@@ -1,6 +1,8 @@
 import { contextBridge, ipcRenderer } from "electron";
 contextBridge.exposeInMainWorld("jojo", {
   command: (request: unknown) => ipcRenderer.invoke("jojo:command", request),
+  importFiles: (workId: string, projectId: string) =>
+    ipcRenderer.invoke("jojo:import", { workId, projectId }),
   saveKey: (providerId: string, key: string) =>
     ipcRenderer.invoke("jojo:key", { providerId, key }),
   export: (request: unknown) => ipcRenderer.invoke("jojo:export", { request }),

@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-10T08:00:50.158Z",
+  "checks": [
+    {
+      "name": "public page actually read and stored with URL",
+      "pass": true
+    },
+    {
+      "name": "real background job finishes",
+      "pass": true
+    },
+    {
+      "name": "loopback URL blocked without imported data",
+      "pass": true
+    }
+  ],
+  "materialHash": "92728d72672a4324dd936dc6dab5cfa3b541e13457b47d9246187b842b91c6e4",
+  "origin": "https://www.iana.org/help/example-domains"
+}

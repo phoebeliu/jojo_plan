@@ -1,0 +1,27 @@
+{
+  "date": "2026-10-10T08:13:58.557Z",
+  "synthetic": true,
+  "automatedReviews": true,
+  "checks": [
+    {
+      "name": "real document generation with material and explicitly attached Skill",
+      "pass": true
+    },
+    {
+      "name": "document cites exact source version",
+      "pass": true
+    },
+    {
+      "name": "report states synthetic execution and production limitations",
+      "pass": true
+    },
+    {
+      "name": "approved document.md exports exact reviewed version",
+      "pass": true
+    }
+  ],
+  "workId": "8493c451-b0f9-4c27-95a0-ed9b95414f77",
+  "sourceVersion": "ea64201f-a98d-4f3a-b16d-d38774e8751d",
+  "outputVersion": "c1ca0907-2c95-454d-affb-b9b4fb5286c2",
+  "skillVersion": "ef468a69-bd54-4584-8f2d-feff33cb08af"
+}

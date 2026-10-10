@@ -1,0 +1,35 @@
+
+> jojo-plan@0.2.0 test
+> node --import tsx --test tests/core/*.test.ts
+
+✔ fresh migration and restart retain projects and immutable versions (84.313834ms)
+✔ idempotent response commits with operation; changed replay rejected (41.736833ms)
+✔ unknown payload and agent approval are rejected (46.263ms)
+✔ project memory isolation, candidate gate and method validation gate (52.503666ms)
+✔ correction returns candidate; forgetting purges every body and leaves tombstone (44.947542ms)
+✔ view pin survives change without freezing fingerprint; stale/script proposal rejected (56.314083ms)
+✔ preview fingerprint conflicts and budget cannot be bypassed by memory (43.991083ms)
+✔ restore old backup does not resurrect forgotten memory or cached plaintext (40.298417ms)
+✔ expired memories and global suspension are excluded from new context (37.570583ms)
+✔ interrupted run recovers without replay and conservatively reconciles budget (34.212333ms)
+✔ same requirements with a new output version cannot reuse old review fingerprint (47.335625ms)
+✔ corrupt content cannot be read as trustworthy evidence and exact backup bytes can repair it (39.046375ms)
+✔ agent authorization precedes cached responses and is bound to work scope (34.248791ms)
+✔ cached context query cannot bypass later global suspension (35.338291ms)
+✔ source reader rejects reserved addresses and strips active page elements (0.654417ms)
+✔ material is scoped, hash-verified and bound to prompt and approval fingerprint (110.237791ms)
+✔ system phase approval advances one stage, binds preceding artifacts, never delivers early (113.731834ms)
+✔ supplement invalidates delivered result but memory source does not change task inputs (59.993292ms)
+✔ source bundle forbids traversal, hidden files, dependencies and duplicate paths (0.518666ms)
+✔ Skill exports standard package and can be explicitly reused only after approval in own project (66.421458ms)
+✔ system handoff exports code rather than the newer test-evidence artifact (52.180958ms)
+✔ openai-completions SDK protocol roundtrip with local SSE fixture (not a real model) (39.321875ms)
+✔ anthropic-messages SDK protocol roundtrip with local SSE fixture (not a real model) (23.460708ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 762.346375

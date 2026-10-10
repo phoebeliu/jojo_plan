@@ -240,6 +240,9 @@
               "type": "integer",
               "minimum": 2000,
               "maximum": 2000000
+            },
+            "allowContainer": {
+              "const": true
             }
           },
           "required": ["workId", "providerId", "allowSend", "tokenLimit"],
@@ -368,6 +371,277 @@
             }
           },
           "required": ["workId", "text"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "requestId",
+        "projectId",
+        "method",
+        "expectedRevision",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": 2
+        },
+        "requestId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "projectId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "method": {
+          "const": "material.import"
+        },
+        "expectedRevision": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "workId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 150
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200000
+            },
+            "origin": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            }
+          },
+          "required": ["workId", "name", "text", "origin"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "requestId",
+        "projectId",
+        "method",
+        "expectedRevision",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": 2
+        },
+        "requestId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "projectId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "method": {
+          "const": "system.rework"
+        },
+        "expectedRevision": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "workId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "stage": {
+              "enum": [
+                "research",
+                "product",
+                "design",
+                "architecture",
+                "test-design",
+                "implementation",
+                "final-review"
+              ]
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20000
+            }
+          },
+          "required": ["workId", "stage", "reason"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "requestId",
+        "projectId",
+        "method",
+        "expectedRevision",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": 2
+        },
+        "requestId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "projectId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "method": {
+          "const": "material.fetch"
+        },
+        "expectedRevision": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "workId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri",
+              "maxLength": 2000
+            },
+            "allowFetch": {
+              "const": true
+            }
+          },
+          "required": ["workId", "url", "allowFetch"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "requestId",
+        "projectId",
+        "method",
+        "expectedRevision",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": 2
+        },
+        "requestId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "projectId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "method": {
+          "const": "skill.attach"
+        },
+        "expectedRevision": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "workId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "versionId": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "required": ["workId", "versionId"],
           "additionalProperties": false
         }
       },

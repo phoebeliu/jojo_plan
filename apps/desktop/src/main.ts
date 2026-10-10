@@ -13,6 +13,7 @@ import {
   writeFileSync,
   mkdirSync,
   renameSync,
+  statSync,
 } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { execFileSync } from "node:child_process";
@@ -127,6 +128,44 @@ if (ownsInstance)
       trusted(event);
       return send(request);
     });
+    ipcMain.handle("jojo:import", async (event, { workId, projectId }) => {
+      trusted(event);
+      const chosen = await dialog.showOpenDialog(win, {
+        properties: ["openFile", "multiSelections"],
+        filters: [
+          { name: "UTF-8 文本材料", extensions: ["md", "txt", "csv", "json"] },
+        ],
+      });
+      if (chosen.canceled) return { imported: 0 };
+      if (chosen.filePaths.length > 10) throw Error("一次最多导入10个文件");
+      const materials = chosen.filePaths.map((file) => {
+        if (statSync(file).size > 200000)
+          throw Error("单个材料最多200KB，请拆分后导入");
+        const text = new TextDecoder("utf-8", { fatal: true }).decode(
+          readFileSync(file),
+        );
+        return { file, text };
+      });
+      let imported = 0;
+      for (const { file, text } of materials) {
+        const response = await send({
+          schemaVersion: 2,
+          requestId: randomUUID(),
+          projectId,
+          expectedRevision: null,
+          method: "material.import",
+          payload: {
+            workId,
+            name: file.split("/").at(-1),
+            text,
+            origin: "本机文件 · 用户选择",
+          },
+        });
+        if (!response.ok) throw Error(response.error.message);
+        imported++;
+      }
+      return { imported };
+    });
     ipcMain.handle("jojo:key", async (event, { providerId, key }) => {
       trusted(event);
       if (
@@ -157,6 +196,7 @@ if (ownsInstance)
     ipcMain.handle("jojo:export", async (event, data) => {
       trusted(event);
       const request = data.request;
+      if (request?.method !== "data.export") throw Error("仅允许导出交接包");
       const response = await send(request);
       if (!response.ok) return response;
       const r = await dialog.showSaveDialog(win, {

@@ -344,14 +344,14 @@ main {
 }
 .composer button,
 .composer select {
-  font-size: 11px;
+  font-size: 12px;
 }
 .composer label {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 10px;
-  color: #696879;
+  font-size: 11px;
+  color: #565462;
   flex: 1;
 }
 .composer input {
@@ -547,4 +547,51 @@ footer {
   width: 34px;
   height: 40px;
   object-fit: contain;
+}
+/* Deliverable reading and staged work stay within the conversation shell. */
+.markdown {
+  overflow-wrap: anywhere;
+  line-height: 1.75;
+}
+.markdown p {
+  white-space: pre-wrap;
+  margin: 0.35rem 0;
+}
+.markdown h2,
+.markdown h3,
+.markdown h4 {
+  margin: 1.3rem 0 0.6rem;
+}
+.markdown pre {
+  background: #f1efea;
+  border-radius: 12px;
+  padding: 18px;
+  overflow-x: auto;
+  white-space: pre;
+}
+.markdown .list-line {
+  padding-left: 12px;
+}
+.stage-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 36px 20px;
+}
+.stage-strip span {
+  color: #66615e;
+  font-size: 11px;
+  border: 1px solid #dedbd4;
+  border-radius: 20px;
+  padding: 7px 10px;
+}
+.stage-strip .selected {
+  color: #443778;
+  background: #eee9fa;
+  border-color: #baaedb;
+}
+.stage-strip .passed {
+  color: #2d6957;
+  border-color: #c4dacf;
+  background: #edf5f0;
 }

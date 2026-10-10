@@ -60,12 +60,16 @@ export const payloads = {
       items: { ...str, maxLength: 200 },
     },
   }),
-  "work.start": object({
-    workId: id,
-    providerId: id,
-    allowSend: { const: true },
-    tokenLimit: { type: "integer", minimum: 2000, maximum: 2000000 },
-  }),
+  "work.start": object(
+    {
+      workId: id,
+      providerId: id,
+      allowSend: { const: true },
+      tokenLimit: { type: "integer", minimum: 2000, maximum: 2000000 },
+      allowContainer: { const: true },
+    },
+    ["workId", "providerId", "allowSend", "tokenLimit"],
+  ),
   "work.control": object({
     workId: id,
     action: { enum: ["pause", "resume", "cancel"] },
@@ -78,6 +82,33 @@ export const payloads = {
     },
     ["workId", "text"],
   ),
+  "material.import": object({
+    workId: id,
+    name: { ...str, maxLength: 150 },
+    text: { ...str, maxLength: 200000 },
+    origin: { ...str, maxLength: 2000 },
+  }),
+  "system.rework": object({
+    workId: id,
+    stage: {
+      enum: [
+        "research",
+        "product",
+        "design",
+        "architecture",
+        "test-design",
+        "implementation",
+        "final-review",
+      ],
+    },
+    reason: str,
+  }),
+  "material.fetch": object({
+    workId: id,
+    url: { type: "string", format: "uri", maxLength: 2000 },
+    allowFetch: { const: true },
+  }),
+  "skill.attach": object({ workId: id, versionId: id }),
   "provider.save": object({
     name: str,
     protocol: {

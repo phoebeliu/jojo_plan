@@ -1,0 +1,9 @@
+{
+  "date": "2026-10-10T08:14:43.213Z",
+  "synthetic": true,
+  "passed": true,
+  "code": 0,
+  "log": "TAP version 13\n# Subtest: non-root and no Docker/host mounts\nok 1 - non-root and no Docker/host mounts\n  ---\n  duration_ms: 0.792\n  type: 'test'\n  ...\n# Subtest: workspace writes are rejected\nok 2 - workspace writes are rejected\n  ---\n  duration_ms: 0.230375\n  type: 'test'\n  ...\n# Subtest: outbound network is rejected\nok 3 - outbound network is rejected\n  ---\n  duration_ms: 2.729208\n  type: 'test'\n  ...\n1..3\n# tests 3\n# suites 0\n# pass 3\n# fail 0\n# cancelled 0\n# skipped 0\n# todo 0\n# duration_ms 52.52075\n",
+  "image": "sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1",
+  "baseDigest": "node@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1"
+}

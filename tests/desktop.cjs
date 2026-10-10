@@ -83,7 +83,7 @@ let app;
       );
       await page.locator(".artifact-grid button").first().click();
       assert(
-        (await page.locator(".panel-content pre").innerText()).includes(
+        (await page.locator(".panel-content .markdown").innerText()).includes(
           "持续集成",
         ),
         "Wrong artifact",
@@ -194,7 +194,9 @@ let app;
     await check(
       "Packaged app itself generates and reviews a real model artifact",
       async () => {
-        await page.getByLabel("允许将目标与适用准则发送给此模型").check();
+        await page
+          .getByLabel("允许将目标、工作材料、前序成果与适用准则发送给此模型")
+          .check();
         await page.getByRole("button", { name: "开始 / 重新验证 →" }).click();
         await page
           .locator(".outcome")
@@ -205,7 +207,7 @@ let app;
           .filter({ hasText: "交付草稿" })
           .last()
           .click();
-        const text = await page.locator(".panel-content pre").innerText();
+        const text = await page.locator(".panel-content .markdown").innerText();
         assert(
           /故障|失败/.test(text) && /持续集成|CI/.test(text),
           "New output misses synthetic task",
