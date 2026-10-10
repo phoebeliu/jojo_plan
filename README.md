@@ -27,3 +27,5 @@ AI 项目负责人的个人交付替身：按你认可的方法组织工作，�
 2026-10-09：[实际阶段验收](docs/implementation/phase1-review.md)，包括真实模型、退出恢复、变更失效与打包后App实测。安装包在release/，二进制不提交源码Git。
 
 2026-10-10：[MVP 运行与安装](docs/implementation/README.md) · [真实验收报告](docs/implementation/mvp-review.md) · [新增待拍板项](docs/implementation/mvp-owner-decisions.md)。三条交付路径已跑通；系统执行范围、模型/发行限制以本次报告为准。
+
+2026-10-10 范围确认：后续建议已确认，首批领域材料改为网上公开护照示例与公司 IPO 销售穿行案例，当前仅本机使用。参阅[确认记录](docs/implementation/mvp-owner-decisions.md)与[来源及验收计划](docs/implementation/public-case-acceptance.md)。
