@@ -1,6 +1,6 @@
 {
   "name": "jojo-plan",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "main": "dist/main.cjs",
@@ -14,7 +14,8 @@
     "format": "prettier --write apps packages scripts tests",
     "test:mvp": "node --import tsx scripts/acceptance-mvp.ts",
     "test:sources": "node --import tsx scripts/acceptance-sources.ts",
-    "test:desktop:mvp": "npm run build && node tests/desktop-mvp.cjs"
+    "test:desktop:mvp": "npm run build && node tests/desktop-mvp.cjs",
+    "test:materials": "node --import tsx scripts/acceptance-materials.ts"
   },
   "build": {
     "appId": "com.jojoplan.desktop",
@@ -24,12 +25,17 @@
     },
     "files": [
       "dist/**",
+      "!dist/jojo-vision",
       "package.json"
     ],
     "extraResources": [
       {
         "from": "packages/storage/migrations",
         "to": "migrations"
+      },
+      {
+        "from": "dist/jojo-vision",
+        "to": "jojo-vision"
       }
     ],
     "mac": {
@@ -49,6 +55,7 @@
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
     "fflate": "0.8.3",
+    "pdfjs-dist": "6.4.299",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },

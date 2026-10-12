@@ -4,7 +4,11 @@ declare global {
   interface Window {
     jojo: {
       command: (r: any) => Promise<any>;
-      importFiles: (workId: string, projectId: string) => Promise<any>;
+      importFiles: (
+        workId: string,
+        projectId: string,
+        options?: any,
+      ) => Promise<any>;
       saveKey: (id: string, key: string) => Promise<any>;
       export: (r: any) => Promise<any>;
       onEvent: (f: () => void) => () => void;
@@ -74,9 +78,12 @@ function App() {
     [criteria, setCriteria] = useState(""),
     [project, setProject] = useState(""),
     [kind, setKind] = useState("document"),
+    [runtime, setRuntime] = useState("python"),
     [allow, setAllow] = useState(false),
     [allowContainer, setAllowContainer] = useState(false),
     [materialName, setMaterialName] = useState("参考材料"),
+    [firstPage, setFirstPage] = useState(1),
+    [lastPage, setLastPage] = useState(20),
     [materialOrigin, setMaterialOrigin] = useState("用户提供"),
     [materialText, setMaterialText] = useState(""),
     [reviewReason, setReviewReason] = useState(""),
@@ -200,7 +207,13 @@ function App() {
       .filter(Boolean);
     const result = await call(
       "work.create",
-      { name: newName, goal: newGoal, kind, criteria: c },
+      {
+        name: newName,
+        goal: newGoal,
+        kind,
+        criteria: c,
+        ...(kind === "system" ? { runtime } : {}),
+      },
       null,
       project,
     );
@@ -321,7 +334,7 @@ function App() {
         <div className="sidebar-foot">
           <button onClick={() => open("settings")}>模型与设置</button>
           <p>本地保存 · 真实状态</p>
-          <small>MVP / 0.2.0</small>
+          <small>MVP / 0.3.0</small>
         </div>
       </aside>
       <main>
@@ -621,7 +634,7 @@ function App() {
               if (e.key === "Tab") {
                 const els = [
                   ...e.currentTarget.querySelectorAll<HTMLElement>(
-                    "button:not(:disabled),input,textarea,select",
+                    "button:not(:disabled),input,textarea,select,summary",
                   ),
                 ];
                 const first = els[0],
@@ -705,6 +718,18 @@ function App() {
                       <option value="system">系统研发 · 分阶段团队</option>
                     </select>
                   </label>
+                  {kind === "system" && (
+                    <label>
+                      执行栈
+                      <select
+                        value={runtime}
+                        onChange={(e) => setRuntime(e.target.value)}
+                      >
+                        <option value="python">Python 标准库 Web/API</option>
+                        <option value="node">Node Web/API</option>
+                      </select>
+                    </label>
+                  )}
                   <label>
                     工作名称
                     <input
@@ -886,7 +911,8 @@ function App() {
                   )}
                   <p>
                     Docker隔离测试已接入，系统MVP限定无外部依赖的Node
-                    Web/API。自动搜索、OCR、PDF/DOCX/PPT、生产发布与正式签名另列后续版本。
+                    Web/API。本机图片OCR与PDF选页提取已接入；自动搜索、扫描PDF
+                    OCR、DOCX/PPT与生产发布另列后续。当前仅本机使用。
                   </p>
                 </>
               )}
@@ -901,7 +927,56 @@ function App() {
                         </span>
                         <h2>{a.title}</h2>
                         <p>SHA-256：{a.object_hash}</p>
+                        {a.previewUrl && (
+                          <img
+                            className="source-image"
+                            src={a.previewUrl}
+                            alt={a.title + " · 原始示例图片"}
+                          />
+                        )}
                         <Markdown text={a.text} />
+                        {a.sourceSpans?.length > 0 && (
+                          <details>
+                            <summary>查看来源定位与置信度</summary>
+                            <table>
+                              <thead>
+                                <tr>
+                                  <th>序号</th>
+                                  <th>定位</th>
+                                  <th>识别置信度</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {a.sourceSpans
+                                  .slice(0, 100)
+                                  .map((span: any, i: number) => (
+                                    <tr key={i}>
+                                      <td>{i + 1}</td>
+                                      <td>
+                                        {JSON.stringify(
+                                          JSON.parse(span.locator_json),
+                                        )}
+                                      </td>
+                                      <td>
+                                        {span.confidence === null
+                                          ? "文本提取，不是OCR评分"
+                                          : span.confidence.toFixed(3)}
+                                      </td>
+                                    </tr>
+                                  ))}
+                              </tbody>
+                            </table>
+                          </details>
+                        )}
+
+                        {a.sourceSpans?.length > 0 && (
+                          <p>
+                            来源定位 {a.sourceSpans.length} 处 ·{" "}
+                            {a.metadata.ocrApplied
+                              ? "OCR包含置信度与原图坐标，不能替代人工核对"
+                              : `PDF ${a.metadata.firstPage}–${a.metadata.lastPage} 页 / 共 ${a.metadata.totalPages} 页`}
+                          </p>
+                        )}
                       </article>
                     ))}
                 </>
@@ -909,14 +984,37 @@ function App() {
               {panel === "materials" && (
                 <>
                   <p>
-                    导入 UTF-8 Markdown、文本、CSV 或
-                    JSON。单文件200KB，模型只接收此工作材料。来源材料是依据，不会作为指令执行。添加材料会使旧审批失效。
+                    导入文本、PDF、PNG或JPEG。文本上限200KB，原文件上限8MB。PDF保留选页与页码；图片在本机OCR。模型接收提取文字，原图不自动上传。添加材料会使旧审批失效。
                   </p>
+                  <label>
+                    PDF起始页
+                    <input
+                      type="number"
+                      min="1"
+                      max="500"
+                      value={firstPage}
+                      onChange={(e) => setFirstPage(Number(e.target.value))}
+                    />
+                  </label>
+                  <label>
+                    PDF结束页
+                    <input
+                      type="number"
+                      min="1"
+                      max="500"
+                      value={lastPage}
+                      onChange={(e) => setLastPage(Number(e.target.value))}
+                    />
+                  </label>
                   <button
-                    disabled={!!running}
+                    disabled={!!running || !!jobs}
                     onClick={async () => {
                       try {
-                        await window.jojo.importFiles(current, pid!);
+                        await window.jojo.importFiles(current, pid!, {
+                          firstPage,
+                          lastPage,
+                          origin: materialOrigin,
+                        });
                         await refresh();
                       } catch (e: any) {
                         setError(e.message);

@@ -1,0 +1,22 @@
+{
+  "date": "2026-10-12",
+  "scope": "Actual packaged desktop; named public fixtures injected as native chooser selection; no model call",
+  "checks": [
+    {
+      "name": "Python is selectable and stored in real work contract",
+      "pass": true
+    },
+    {
+      "name": "packaged PDF reader imports selected pages and exposes provenance",
+      "pass": true
+    },
+    {
+      "name": "packaged native Vision helper produces OCR and safe local image preview",
+      "pass": true
+    },
+    {
+      "name": "original files and derived OCR/PDF versions survive app restart",
+      "pass": true
+    }
+  ]
+}

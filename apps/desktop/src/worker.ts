@@ -1,7 +1,7 @@
 import { Store } from "../../../packages/core/src/store.js";
 import { Service } from "../../../packages/core/src/service.js";
 import { PiRuntime } from "../../../packages/core/src/runtime.js";
-const [root, migrations, codex] = process.argv.slice(2);
+const [root, migrations, codex, ocrPath] = process.argv.slice(2);
 const parent = (process as any).parentPort;
 const keys = new Map<string, string>();
 const store = new Store(root, migrations);
@@ -10,6 +10,7 @@ const service = new Service(
   new PiRuntime(root, codex || undefined),
   (id) => keys.get(id),
   (e) => parent.postMessage(e),
+  { ocrPath },
 );
 parent.on("message", async ({ data }: any) => {
   if (data.keys) {

@@ -595,3 +595,25 @@ footer {
   border-color: #c4dacf;
   background: #edf5f0;
 }
+.source-image {
+  display: block;
+  max-width: 100%;
+  max-height: 560px;
+  margin: 18px auto;
+  object-fit: contain;
+  border: 1px solid #dedbd4;
+  border-radius: 8px;
+}
+.panel table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+.panel th,
+.panel td {
+  overflow-wrap: anywhere;
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid #dedbd4;
+  font-size: 11px;
+}

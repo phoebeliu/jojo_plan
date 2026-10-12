@@ -81,6 +81,9 @@ if (ownsInstance)
           ? join(process.resourcesPath, "migrations")
           : join(app.getAppPath(), "packages/storage/migrations"),
         codex,
+        app.isPackaged
+          ? join(process.resourcesPath, "jojo-vision")
+          : join(app.getAppPath(), "dist/jojo-vision"),
       ],
       { serviceName: "Jojo Domain Service" },
     );
@@ -128,44 +131,92 @@ if (ownsInstance)
       trusted(event);
       return send(request);
     });
-    ipcMain.handle("jojo:import", async (event, { workId, projectId }) => {
-      trusted(event);
-      const chosen = await dialog.showOpenDialog(win, {
-        properties: ["openFile", "multiSelections"],
-        filters: [
-          { name: "UTF-8 文本材料", extensions: ["md", "txt", "csv", "json"] },
-        ],
-      });
-      if (chosen.canceled) return { imported: 0 };
-      if (chosen.filePaths.length > 10) throw Error("一次最多导入10个文件");
-      const materials = chosen.filePaths.map((file) => {
-        if (statSync(file).size > 200000)
-          throw Error("单个材料最多200KB，请拆分后导入");
-        const text = new TextDecoder("utf-8", { fatal: true }).decode(
-          readFileSync(file),
-        );
-        return { file, text };
-      });
-      let imported = 0;
-      for (const { file, text } of materials) {
-        const response = await send({
-          schemaVersion: 2,
-          requestId: randomUUID(),
+    ipcMain.handle(
+      "jojo:import",
+      async (
+        event,
+        {
+          workId,
           projectId,
-          expectedRevision: null,
-          method: "material.import",
-          payload: {
-            workId,
-            name: file.split("/").at(-1),
-            text,
-            origin: "本机文件 · 用户选择",
-          },
+          firstPage = 1,
+          lastPage = 20,
+          origin = "本机文件 · 用户选择",
+        },
+      ) => {
+        trusted(event);
+        const chosen = await dialog.showOpenDialog(win, {
+          properties: ["openFile", "multiSelections"],
+          filters: [
+            {
+              name: "文本、PDF与图片",
+              extensions: [
+                "md",
+                "txt",
+                "csv",
+                "json",
+                "pdf",
+                "png",
+                "jpg",
+                "jpeg",
+              ],
+            },
+          ],
         });
-        if (!response.ok) throw Error(response.error.message);
-        imported++;
-      }
-      return { imported };
-    });
+        if (chosen.canceled) return { imported: 0 };
+        if (chosen.filePaths.length > 10) throw Error("一次最多导入10个文件");
+        const materials = chosen.filePaths.map((file) => {
+          const binary = /\.(pdf|png|jpe?g)$/i.test(file);
+          if (statSync(file).size > (binary ? 8 * 1024 * 1024 : 200000))
+            throw Error("文本上限200KB，PDF/图片上限8MB");
+          const bytes = readFileSync(file);
+          const text = binary
+            ? bytes.toString("base64")
+            : new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+          return { file, text, binary };
+        });
+        if (materials.reduce((n, m) => n + m.text.length, 0) > 32 * 1024 * 1024)
+          throw Error("本次导入超过32MB，请拆分");
+        let imported = 0;
+        for (const { file, text, binary } of materials) {
+          const response = await send({
+            schemaVersion: 2,
+            requestId: randomUUID(),
+            projectId,
+            expectedRevision: null,
+            method: binary ? "material.ingest" : "material.import",
+            payload: {
+              workId,
+              name: file.split("/").at(-1),
+              ...(binary ? { base64: text, firstPage, lastPage } : { text }),
+              origin,
+            },
+          });
+          if (!response.ok) throw Error(response.error.message);
+          imported++;
+          if (binary && imported < materials.length) {
+            const deadline = Date.now() + 70000;
+            while (true) {
+              const snapshot = await send({
+                schemaVersion: 2,
+                requestId: randomUUID(),
+                projectId: null,
+                expectedRevision: null,
+                method: "app.snapshot",
+                payload: {},
+              });
+              const job = snapshot.result?.details
+                .find((d: any) => d.work.id === workId)
+                ?.jobs.find((j: any) => j.id === response.result.operationId);
+              if (job && job.state !== "running") break;
+              if (Date.now() > deadline)
+                throw Error("已导入的文件正在解析，请待完成后继续下一批");
+              await new Promise((r) => setTimeout(r, 250));
+            }
+          }
+        }
+        return { imported };
+      },
+    );
     ipcMain.handle("jojo:key", async (event, { providerId, key }) => {
       trusted(event);
       if (

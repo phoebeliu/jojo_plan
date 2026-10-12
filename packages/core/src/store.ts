@@ -12,6 +12,7 @@ import {
 } from "node:fs";
 import { join } from "node:path";
 import { zipSync, strToU8 } from "fflate";
+import { binaryHash } from "./materials.js";
 import { stages, parseFiles, skillCheck } from "./delivery.js";
 export const uid = () => randomUUID(),
   now = () => new Date().toISOString();
@@ -203,8 +204,12 @@ export class Store {
       (parent?.version || 0) + 1,
       parent?.id || null,
       hash,
-      "text/markdown",
-      Buffer.byteLength(text),
+      (metadata as any)?.encoding === "base64"
+        ? (metadata as any).mime
+        : "text/markdown",
+      (metadata as any)?.encoding === "base64"
+        ? (metadata as any).byteLength
+        : Buffer.byteLength(text),
       author,
       author === "agent" ? "coordinator" : "trusted-service",
       JSON.stringify(metadata),
@@ -218,10 +223,34 @@ export class Store {
       id,
     );
     if (!v) fail("NOT_FOUND", "版本不存在");
+    const metadata = JSON.parse(v.metadata_json),
+      body = this.verifiedBody(v.object_hash);
+    if (metadata.encoding === "base64") {
+      const bytes = Buffer.from(body, "base64");
+      if (binaryHash(bytes) !== metadata.rawSha256)
+        fail("OBJECT_CORRUPT", "原始文件校验失败");
+      const parsed = this.one(
+        "SELECT v.id FROM artifact_version v JOIN artifact a ON a.id=v.artifact_id WHERE a.kind='source_material' AND json_extract(v.metadata_json,'$.originalVersionId')=? AND json_extract(v.metadata_json,'$.ocrApplied')=1",
+        v.id,
+      );
+      return {
+        ...v,
+        text: "原始文件保存在本机。解析结果是单独的派生材料；导出交接包可获取原文件。",
+        metadata,
+        previewUrl:
+          parsed && metadata.mime.startsWith("image/")
+            ? `data:${metadata.mime};base64,${body}`
+            : null,
+      };
+    }
     return {
       ...v,
-      text: this.verifiedBody(v.object_hash),
-      metadata: JSON.parse(v.metadata_json),
+      text: body,
+      metadata,
+      sourceSpans: this.all(
+        "SELECT locator_json,confidence,text_hash,parser_version FROM source_span WHERE version_id=?",
+        id,
+      ),
     };
   }
   verifiedBody(hash: string) {
@@ -241,7 +270,7 @@ export class Store {
     const w = this.work(workId),
       c = this.contract(workId);
     const sources = this.all(
-      "SELECT v.id FROM artifact_version v JOIN artifact a ON a.id=v.artifact_id WHERE a.work_id=? AND a.kind='source_material' ORDER BY v.rowid",
+      "SELECT v.id FROM artifact_version v JOIN artifact a ON a.id=v.artifact_id WHERE a.work_id=? AND a.kind IN ('source_material','source_attachment') ORDER BY v.rowid",
       workId,
     ).map((v) => v.id);
     const supplements = this.all(
@@ -313,6 +342,7 @@ export class Store {
     this.run("INSERT INTO conversation VALUES(?,?,?)", uid(), id, now());
     this.run("INSERT INTO work_preference(work_id) VALUES(?)", id);
     this.artifact(id, "prd", "交付约定", p.goal, {
+      runtime: p.runtime || "node",
       deliveryContract: {
         schemaVersion: "delivery-contract/1",
         criteria: p.criteria.map((statement: string, i: number) => ({
@@ -719,6 +749,7 @@ export class Store {
       "交付约定",
       p.goal,
       {
+        runtime: old.metadata.runtime || "node",
         deliveryContract: {
           schemaVersion: "delivery-contract/1",
           criteria: p.criteria.map((statement: string, i: number) => ({
@@ -776,6 +807,7 @@ export class Store {
     text: string,
     origin: string,
     selectedSkillVersionId: string | null = null,
+    extraMetadata: any = {},
   ) {
     const w = this.work(workId);
     if (w.state === "active")
@@ -790,6 +822,7 @@ export class Store {
         importedAt: now(),
         parser: "utf8-text/1",
         selectedSkillVersionId,
+        ...extraMetadata,
       },
       "user",
     );
@@ -995,18 +1028,31 @@ export class Store {
         manifest.excluded.push({ id: a.id, reason: "restricted" });
         continue;
       }
-      const name = a.kind + "-" + a.version + "-" + a.id + ".md";
-      files[name] = strToU8(a.text);
+      const binary = a.metadata.encoding === "base64";
+      const name = binary
+        ? "originals/" +
+          a.id +
+          (a.metadata.mime === "application/pdf"
+            ? ".pdf"
+            : a.metadata.mime === "image/png"
+              ? ".png"
+              : ".jpg")
+        : a.kind + "-" + a.version + "-" + a.id + ".md";
+      files[name] = binary
+        ? Buffer.from(this.verifiedBody(a.object_hash), "base64")
+        : strToU8(a.text);
       manifest.files.push({
         path: name,
         title: a.title,
         kind: a.kind,
         stage: a.metadata.stage || null,
         versionId: a.id,
-        sha256: a.object_hash,
+        sha256: binary ? a.metadata.rawSha256 : a.object_hash,
       });
     }
-    files["README.md"] = strToU8(`# ${d.work.name}\n\n状态：${d.work.state}。当前指纹：${d.fingerprint}\n\n目标：${d.work.goal}\n\n${manifest.openItems.join("\n")}\n\n## 成果与依据\n\n${manifest.files.map((f: any) => `- [${f.title}${f.stage ? " · " + f.stage : ""}](${f.path})`).join("\n")}\n\n完整版本与校验和见 handoff.json。历史和失效成果保留，不能用其代替当前验收依据。系统源代码在 system/，启动与局限见 system/README.md（如提供）；Skill 在 skills/，文档在 document.md。\n`);
+    files["README.md"] = strToU8(
+      `# ${d.work.name}\n\n状态：${d.work.state}。当前指纹：${d.fingerprint}\n\n目标：${d.work.goal}\n\n${manifest.openItems.join("\n")}\n\n## 成果与依据\n\n${manifest.files.map((f: any) => `- [${f.title}${f.stage ? " · " + f.stage : ""}](${f.path})`).join("\n")}\n\n完整版本与校验和见 handoff.json。历史和失效成果保留，不能用其代替当前验收依据。系统源代码在 system/，启动与局限见 system/README.md（如提供）；Skill 在 skills/，文档在 document.md。\n`,
+    );
     const output = d.artifacts
       .filter(
         (a: any) =>

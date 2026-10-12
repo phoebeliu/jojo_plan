@@ -49,17 +49,21 @@ export const memoryPayload = object(
 export const payloads = {
   "app.snapshot": object({}),
   "project.create": object({ name: { ...str, maxLength: 80 } }),
-  "work.create": object({
-    name: { ...str, maxLength: 150 },
-    kind: { enum: ["skill", "document", "system"] },
-    goal: str,
-    criteria: {
-      type: "array",
-      minItems: 1,
-      maxItems: 30,
-      items: { ...str, maxLength: 200 },
+  "work.create": object(
+    {
+      name: { ...str, maxLength: 150 },
+      kind: { enum: ["skill", "document", "system"] },
+      goal: str,
+      runtime: { enum: ["node", "python"] },
+      criteria: {
+        type: "array",
+        minItems: 1,
+        maxItems: 30,
+        items: { ...str, maxLength: 200 },
+      },
     },
-  }),
+    ["name", "kind", "goal", "criteria"],
+  ),
   "work.start": object(
     {
       workId: id,
@@ -82,6 +86,14 @@ export const payloads = {
     },
     ["workId", "text"],
   ),
+  "material.ingest": object({
+    workId: id,
+    name: { ...str, maxLength: 150 },
+    origin: { ...str, maxLength: 2000 },
+    base64: { type: "string", minLength: 4, maxLength: 11184812 },
+    firstPage: { type: "integer", minimum: 1, maximum: 500 },
+    lastPage: { type: "integer", minimum: 1, maximum: 500 },
+  }),
   "material.import": object({
     workId: id,
     name: { ...str, maxLength: 150 },

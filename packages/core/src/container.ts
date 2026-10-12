@@ -48,7 +48,9 @@ export function dockerCommand(
     child.once("close", (code) => finish(code ?? -1));
   });
 }
-export async function environment() {
+export async function environment(runtime = "node") {
+  const imageName =
+    runtime === "python" ? "python:3.13-alpine" : "node:24-alpine";
   const info = await dockerCommand(
     ["info", "--format", "{{.ServerVersion}}"],
     undefined,
@@ -58,7 +60,7 @@ export async function environment() {
   const image =
     info.code === 0
       ? await dockerCommand(
-          ["image", "inspect", "node:24-alpine", "--format", "{{.Id}}"],
+          ["image", "inspect", imageName, "--format", "{{.Id}}"],
           undefined,
           undefined,
           10000,
@@ -79,6 +81,13 @@ export async function testFiles(
   signal: AbortSignal,
   event: (e: any) => void,
 ) {
+  const runtime = files.some((f) => f.path === "server.py") ? "python" : "node";
+  const imageName =
+    runtime === "python" ? "python:3.13-alpine" : "node:24-alpine";
+  const command =
+    runtime === "python"
+      ? ["python", "-m", "unittest", "discover", "-s", "tests", "-v"]
+      : ["node", "--test", "--test-reporter=tap"];
   const name = "jojo-test-" + randomUUID(),
     dir = join(root, "sandboxes", name);
   mkdirSync(dir, { recursive: true, mode: 0o755 });
@@ -87,12 +96,12 @@ export async function testFiles(
     mkdirSync(dirname(file), { recursive: true });
     writeFileSync(file, f.content, { mode: 0o644 });
   }
-  const info = await environment();
+  const info = await environment(runtime);
   if (!info.dockerReady)
     return { passed: false, code: -1, log: info.message, image: null };
   if (!info.imageReady) {
     const pull = await dockerCommand(
-      ["pull", "node:24-alpine"],
+      ["pull", imageName],
       signal,
       event,
       180000,
@@ -101,22 +110,21 @@ export async function testFiles(
       return { passed: false, code: pull.code, log: pull.log, image: null };
   }
   const image = await dockerCommand(
-    ["image", "inspect", "node:24-alpine", "--format", "{{.Id}}"],
+    ["image", "inspect", imageName, "--format", "{{.Id}}"],
     signal,
   );
   if (image.code !== 0 || !/^sha256:[a-f0-9]{64}$/.test(image.log.trim()))
     return { passed: false, code: -1, log: "无法确认镜像ID", image: null };
   const base = await dockerCommand(
-    [
-      "image",
-      "inspect",
-      "node:24-alpine",
-      "--format",
-      "{{index .RepoDigests 0}}",
-    ],
+    ["image", "inspect", imageName, "--format", "{{index .RepoDigests 0}}"],
     signal,
   );
-  if (base.code !== 0 || !/^node@sha256:[a-f0-9]{64}$/.test(base.log.trim()))
+  if (
+    base.code !== 0 ||
+    !new RegExp(
+      `^${runtime === "python" ? "python" : "node"}@sha256:[a-f0-9]{64}$`,
+    ).test(base.log.trim())
+  )
     return { passed: false, code: -1, log: "基础镜像摘要不可用", image: null };
   const stop = () => {
     void dockerCommand(["rm", "-f", name], undefined, undefined, 10000);
@@ -125,7 +133,7 @@ export async function testFiles(
   try {
     writeFileSync(
       join(dir, "Dockerfile"),
-      `FROM ${base.log.trim()}\nWORKDIR /workspace\nCOPY --chown=1000:1000 . /workspace\nUSER 1000:1000\nCMD ["node","--test"]\n`,
+      `FROM ${base.log.trim()}\nWORKDIR /workspace\nCOPY --chown=1000:1000 . /workspace\nUSER 1000:1000\nCMD ${JSON.stringify(command)}\n`,
     );
     const built = await dockerCommand(
       [
@@ -171,26 +179,30 @@ export async function testFiles(
         "--workdir",
         "/workspace",
         name,
-        "node",
-        "--test",
-        "--test-reporter=tap",
+        ...command,
       ],
       signal,
       event,
       60000,
     );
-    const counts = /# tests (\d+)/.exec(r.log);
+    const counts = (
+      runtime === "python" ? /Ran (\d+) tests?/ : /# tests (\d+)/
+    ).exec(r.log);
     return {
       passed:
         r.code === 0 &&
         !signal.aborted &&
         !!counts &&
         Number(counts[1]) >= 2 &&
-        /# fail 0/.test(r.log) &&
-        !/# (?:skipped|todo|cancelled) [1-9]/.test(r.log),
+        (runtime === "python"
+          ? /\nOK\s*$/.test(r.log) &&
+            !/skipped|expected failure|unexpected success/i.test(r.log)
+          : /# fail 0/.test(r.log) &&
+            !/# (?:skipped|todo|cancelled) [1-9]/.test(r.log)),
       ...r,
       image: image.log.trim(),
       baseDigest: base.log.trim(),
+      runtime,
     };
   } finally {
     signal.removeEventListener("abort", stop);

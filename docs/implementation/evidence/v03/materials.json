@@ -1,0 +1,76 @@
+{
+  "date": "2026-10-12",
+  "scope": "Public disclosure PDF, locally rendered public passport example, real local OCR and controlled Python tests",
+  "checks": [
+    {
+      "name": "actual IPO PDF preserves selected page provenance",
+      "pass": true
+    },
+    {
+      "name": "original PDF export is byte-identical",
+      "pass": true
+    },
+    {
+      "name": "public passport image actual local OCR detects specimen and face region",
+      "pass": true
+    },
+    {
+      "name": "OCR source locators and confidence are retained",
+      "pass": true
+    },
+    {
+      "name": "image original safely previews only after actual parsing",
+      "pass": true
+    },
+    {
+      "name": "Python stdlib runner executes two real normal and missing-evidence tests",
+      "pass": true
+    },
+    {
+      "name": "Python failing tests cannot be approved as passed",
+      "pass": true
+    },
+    {
+      "name": "real model uses exact parsed PDF version",
+      "pass": true
+    },
+    {
+      "name": "real report preserves disclosure and missing-evidence boundaries",
+      "pass": true
+    }
+  ],
+  "sources": [
+    {
+      "origin": "https://reportdocs.static.szse.cn/UpFiles/rasinfodisc1/202206/RAS_202206_0001810FF1028E3FC1045F490434003F.pdf",
+      "sha256": "37c47654d8fa7eb741a9734609ef8d38d7a29fa078649cca9c21c0a6a345845e",
+      "pages": [
+        54,
+        55
+      ],
+      "parser": "pdfjs-text/6.4.299"
+    },
+    {
+      "origin": "https://assets.publishing.service.gov.uk/media/69257dcf2945773cf12dcfe6/2025_BasicPassportChecks_1.0.pdf#page=12 · 本机Poppler整页渲染；不随发布包分发",
+      "sha256": "702f9a52c7256bb0f47cdbf8a19210c544ec58582674e4c9ee7d8c7bd6dbd718",
+      "parser": "apple-vision/1",
+      "faces": 1,
+      "lines": 35,
+      "redistribution": false
+    }
+  ],
+  "auditWorkId": "15d3aa9d-a524-45db-ac33-a0164245f8b8",
+  "passportWorkId": "14d3a745-c7ad-4dfb-9996-e485d355d7d9",
+  "python": {
+    "passed": true,
+    "code": 0,
+    "log": "test_complete (test_rules.Rules.test_complete) ... ok\ntest_missing (test_rules.Rules.test_missing) ... ok\n\n----------------------------------------------------------------------\nRan 2 tests in 0.000s\n\nOK\n",
+    "image": "sha256:2d9aefe2fef018a7eb2c13064c89c71929800fd2e5dccdbf52ea5da5bb8d929a",
+    "baseDigest": "python@sha256:2d9aefe2fef018a7eb2c13064c89c71929800fd2e5dccdbf52ea5da5bb8d929a",
+    "runtime": "python"
+  },
+  "pythonNegative": {
+    "passed": false,
+    "code": 1
+  },
+  "outputVersion": "f41da911-b376-447e-a698-2f7385079f33"
+}

@@ -162,6 +162,9 @@
               "minLength": 1,
               "maxLength": 20000
             },
+            "runtime": {
+              "enum": ["node", "python"]
+            },
             "criteria": {
               "type": "array",
               "minItems": 1,
@@ -371,6 +374,95 @@
             }
           },
           "required": ["workId", "text"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "requestId",
+        "projectId",
+        "method",
+        "expectedRevision",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": 2
+        },
+        "requestId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "projectId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "method": {
+          "const": "material.ingest"
+        },
+        "expectedRevision": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "workId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 150
+            },
+            "origin": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "base64": {
+              "type": "string",
+              "minLength": 4,
+              "maxLength": 11184812
+            },
+            "firstPage": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500
+            },
+            "lastPage": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500
+            }
+          },
+          "required": [
+            "workId",
+            "name",
+            "origin",
+            "base64",
+            "firstPage",
+            "lastPage"
+          ],
           "additionalProperties": false
         }
       },

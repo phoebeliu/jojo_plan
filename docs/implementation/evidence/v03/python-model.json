@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-12",
+  "scope": "Real model generates Python from a synthetic user PRD; standalone generation and container test, not a replay of seven live roles",
+  "actualModel": true,
+  "inputTokens": 11403,
+  "outputTokens": 1738,
+  "files": [
+    "server.py",
+    "tests/test_system.py",
+    "README.md"
+  ],
+  "tests": {
+    "passed": true,
+    "code": 0,
+    "log": "test_complete_materials (test_system.APISystemTests.test_complete_materials) ... ok\ntest_health (test_system.APISystemTests.test_health) ... ok\ntest_invalid_or_duplicate_material_flag (test_system.APISystemTests.test_invalid_or_duplicate_material_flag) ... ok\ntest_missing_materials (test_system.APISystemTests.test_missing_materials) ... ok\ntest_unknown_path (test_system.APISystemTests.test_unknown_path) ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 0.517s\n\nOK\n",
+    "image": "sha256:2d9aefe2fef018a7eb2c13064c89c71929800fd2e5dccdbf52ea5da5bb8d929a",
+    "baseDigest": "python@sha256:2d9aefe2fef018a7eb2c13064c89c71929800fd2e5dccdbf52ea5da5bb8d929a",
+    "runtime": "python"
+  }
+}

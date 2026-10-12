@@ -12,7 +12,11 @@ export const stages = {
     { id: "final-review", role: "reviewer", title: "产品、市场与技术终审" },
   ],
 };
-export function instructions(kind: keyof typeof stages, stage: string) {
+export function instructions(
+  kind: keyof typeof stages,
+  stage: string,
+  runtime = "node",
+) {
   if (kind === "skill")
     return `输出单个可复用 SKILL.md。以 YAML frontmatter 开始，含 name（小写英文和连字符）、description（何时使用）。正文有 # 标题，输入、步骤、输出、正反例、验收与边界。没有材料支持的事实要标记待核实，不虚构检索。`;
   if (kind === "document")
@@ -32,6 +36,15 @@ export function instructions(kind: keyof typeof stages, stage: string) {
     "final-review":
       "作为独立终审角色，从产品完整性、用户价值/市场说明、UX、技术、安全和实测证据检查已批准的成果。输出缺陷、严重度、需求追踪、未验证事项、部署与回滚步骤及建议。不能用测试绿灯代替业务验收，最终批准由用户。",
   };
+  if (runtime === "python") {
+    if (stage === "architecture")
+      return map[stage].replace(
+        "无外部依赖的Node.js Web/API",
+        "无外部依赖的Python标准库Web/API",
+      );
+    if (stage === "implementation")
+      return `根据批准成果交付Python标准库Web/API。输出 # 研发交付、假设与局限，且仅一个fenced json：{"runtime":"python","files":[{"path":"server.py","content":"..."},{"path":"tests/test_system.py","content":"..."},{"path":"README.md","content":"..."}]}。不安装依赖，不调用外网。入口 python server.py，导入时不启动服务，测试使用unittest至少两个正常/异常断言。固定runner: python -m unittest discover -s tests -v。最多40个文件/200KB，按真实失败日志修复，不能假称实测。`;
+  }
   return map[stage];
 }
 export function parseFiles(text: string): { path: string; content: string }[] {
@@ -44,6 +57,8 @@ export function parseFiles(text: string): { path: string; content: string }[] {
     data.files.length > 40
   )
     throw Error("源码文件数量无效");
+  if (data.runtime && !["node", "python"].includes(data.runtime))
+    throw Error("未知源码运行栈");
   const seen = new Set<string>();
   let size = 0;
   for (const f of data.files) {
@@ -52,7 +67,7 @@ export function parseFiles(text: string): { path: string; content: string }[] {
       typeof f.content !== "string" ||
       !/^(?:[a-zA-Z0-9_-]+\/)*[a-zA-Z0-9_.-]+$/.test(f.path) ||
       f.path.split("/").some((p: string) => p.startsWith(".")) ||
-      !/\.(?:mjs|js|json|html|css|md|svg)$/.test(f.path) ||
+      !/\.(?:mjs|js|py|json|html|css|md|svg)$/.test(f.path) ||
       /(?:node_modules|package-lock|credentials|secrets)/i.test(f.path) ||
       seen.has(f.path.toLowerCase())
     )
@@ -61,6 +76,16 @@ export function parseFiles(text: string): { path: string; content: string }[] {
     size += Buffer.byteLength(f.content);
   }
   if (size > 200000) throw Error("源码超过 200KB");
+  if (data.runtime === "python" || seen.has("server.py")) {
+    if (
+      (data.runtime && data.runtime !== "python") ||
+      seen.has("package.json") ||
+      !seen.has("server.py") ||
+      !data.files.some((f: any) => /^tests\/test_[a-z0-9_]+\.py$/.test(f.path))
+    )
+      throw Error("Python包必须包含标准库服务与unittest，不可混合Node入口");
+    return data.files;
+  }
   const pkg = JSON.parse(
     data.files.find((f: any) => f.path === "package.json")?.content || "{}",
   );

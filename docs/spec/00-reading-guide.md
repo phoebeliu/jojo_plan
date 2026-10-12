@@ -49,3 +49,5 @@ JP-1.1 重点先看 [新交互设计](04-ux-spec.md) 与 [扩展协议](15-conve
 ## 2026-10-10 MVP 实施更新
 
 [0.2.0运行入口](../implementation/README.md)、[MVP实际验收](../implementation/mvp-review.md)与[新增范围待拍板项](../implementation/mvp-owner-decisions.md)是当前可执行范围依据。v2现有35命令，加入材料导入/读取、批准Skill复用和系统返工；仍与旧v1完整52命令分开。七阶段团队现已可运行，首个执行栈限无外部依赖Node Web/API；不是原完整技术栈/生产发布能力全部完成。
+
+2026-10-12：[0.3.0材料/Python迭代](../implementation/v03-review.md)，v2现36命令，新增material.ingest；无SQLite迁移改动。运行栈写入交付合同，原件及页码/OCR定位落入不可变成果与source_span；未实现项仍单独保留。

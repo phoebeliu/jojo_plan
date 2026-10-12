@@ -1,0 +1,42 @@
+
+> jojo-plan@0.3.0 test
+> node --import tsx --test tests/core/*.test.ts
+
+✔ fresh migration and restart retain projects and immutable versions (88.353125ms)
+✔ idempotent response commits with operation; changed replay rejected (42.787125ms)
+✔ unknown payload and agent approval are rejected (53.174583ms)
+✔ project memory isolation, candidate gate and method validation gate (51.164708ms)
+✔ correction returns candidate; forgetting purges every body and leaves tombstone (46.589667ms)
+✔ view pin survives change without freezing fingerprint; stale/script proposal rejected (56.977875ms)
+✔ preview fingerprint conflicts and budget cannot be bypassed by memory (40.905ms)
+✔ restore old backup does not resurrect forgotten memory or cached plaintext (55.367125ms)
+✔ expired memories and global suspension are excluded from new context (43.680209ms)
+✔ interrupted run recovers without replay and conservatively reconciles budget (41.129416ms)
+✔ same requirements with a new output version cannot reuse old review fingerprint (56.083541ms)
+✔ corrupt content cannot be read as trustworthy evidence and exact backup bytes can repair it (42.814625ms)
+✔ agent authorization precedes cached responses and is bound to work scope (41.474208ms)
+✔ cached context query cannot bypass later global suspension (41.156041ms)
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+Warning: UnknownErrorException: Ensure that the `standardFontDataUrl` API parameter is provided.
+✔ PDF selected pages have exact source locators; invalid binary and range fail (447.327416ms)
+Warning: Indexing all PDF objects
+✔ trusted import preserves original bytes, derived link, scope, export and backup recovery (96.551125ms)
+✔ failed PDF parsing preserves raw file without manufacturing extracted evidence (57.411666ms)
+✔ Python source contract rejects mixed Node entry and escaping paths (0.400084ms)
+✔ source reader rejects reserved addresses and strips active page elements (0.628084ms)
+✔ material is scoped, hash-verified and bound to prompt and approval fingerprint (115.993375ms)
+✔ system phase approval advances one stage, binds preceding artifacts, never delivers early (125.413584ms)
+✔ supplement invalidates delivered result but memory source does not change task inputs (64.26175ms)
+✔ source bundle forbids traversal, hidden files, dependencies and duplicate paths (0.649625ms)
+✔ Skill exports standard package and can be explicitly reused only after approval in own project (68.19425ms)
+✔ system handoff exports code rather than the newer test-evidence artifact (59.988125ms)
+✔ openai-completions SDK protocol roundtrip with local SSE fixture (not a real model) (39.534834ms)
+✔ anthropic-messages SDK protocol roundtrip with local SSE fixture (not a real model) (22.695333ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 830.602625
