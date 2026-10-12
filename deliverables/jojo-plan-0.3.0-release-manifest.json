@@ -1,0 +1,31 @@
+{
+  "version": "0.3.0",
+  "date": "2026-10-12",
+  "sourceCommit": "2360a4c75f058cc62c2a1ad29188d75525de3f2b",
+  "distribution": "local-only, arm64; not notarized",
+  "installer": {
+    "path": "release/Jojo Plan-0.3.0-arm64-mac.zip",
+    "bytes": 163006792,
+    "sha256": "8433991de3db53712be29e01dbad11b4aadc26814957f5a0a7a48286ac9c2f2d"
+  },
+  "checks": {
+    "domainAndProtocol": 27,
+    "publicMaterialsAndPython": 9,
+    "packagedNewMaterials": 4,
+    "packagedExistingFlows": 12,
+    "realGeneratedPythonTests": 5
+  },
+  "scope": "Local PDF page text and originals; local Vision OCR/face regions and locators; immutable provenance; Node/Python stdlib controlled delivery",
+  "limits": [
+    "Not passport authenticity certification or labelled fraud accuracy",
+    "Not transaction-level audit executor or professional audit certification",
+    "No scanned-PDF OCR/Word, external Python dependencies, automatic search or 8-Skill groups yet"
+  ],
+  "sampleRedistribution": false,
+  "installedPreviewUpdated": false,
+  "sourceArchive": {
+    "path": "deliverables/jojo-plan-0.3.0-source-and-docs.zip",
+    "bytes": 5284643,
+    "sha256": "5f9080901b20e9db7c10b4df4f6d0fceb582dd1182bf8f72d8c71fc1e72caeef"
+  }
+}
