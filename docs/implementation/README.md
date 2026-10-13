@@ -1,16 +1,16 @@
-# Jojo Plan 0.3.0 · 可本机试用的 MVP
+# Jojo Plan 0.3.1 · 本机 Alpha
 
-2026-10-12。[本轮材料/Python验收](v03-review.md)。定位仍为“AI 项目负责人的个人交付替身”。这个版本已跑通 Skill、文档和小型系统三种交付路径；完整产品目标仍见 JP-1.1＋S2。[MVP 验收报告](mvp-review.md)区分真实模型、合成用例、协议 fixture 和尚未验证的能力。
+2026-10-13。[本机实测与修正](v031-review.md)、[材料/Python 验收](v03-review.md)。定位仍为“AI 项目负责人的个人交付替身”。已有 Skill、文档和小型系统样例验证；不代表任意真实项目都已跑通。本轮 Intelligent UI 工作已生成研究、PRD 和 UIUX，架构初稿被拒绝，尚未交付运行系统。完整产品目标仍见 JP-1.1＋S2。[MVP 验收报告](mvp-review.md)区分真实模型、合成用例、协议 fixture 和尚未验证的能力。
 
 ## 安装与开始
 
-1. 解压 [Apple Silicon 安装包](../../release/Jojo%20Plan-0.3.0-arm64-mac.zip)，打开 Jojo Plan.app。替换旧版本前先退出旧 App，数据沿用同一用户目录。当前按用户决定仅本机使用，不安排外部发行或签名/公证采购。
+1. 解压 [Apple Silicon 安装包](../../release/Jojo%20Plan-0.3.1-arm64-mac.zip)，打开 Jojo Plan.app。替换旧版本前先退出旧 App，数据沿用同一用户目录。当前按用户决定仅本机使用，不安排外部发行或签名/公证采购。
 2. 在“模型与设置”添加模型。已登录的本机 Codex 可作开发试用通道；也支持 OpenAI-compatible / Anthropic messages 接口，密钥由 macOS safeStorage 加密保存。已验证两种接口的本机 SSE 协议回路，尚未逐一验证你的真实供应商。
 3. 创建项目，再创建 Skill、文档或系统工作。**审计项目**里可以分别建销售穿行、IPO 审计工作；**护照校验项目**另建项目，与审计同级。这里是研发工作，不是已经认证的护照或审计判定服务。
 4. 在“材料与来源”选择 UTF-8 的 MD/TXT/CSV/JSON，或粘贴材料。文本单文件最多200KB；PDF/PNG/JPEG原件8MB，一次最多10个。PDF可选页，图片在本机OCR，保留原件、来源和坐标；模型接收提取文字，原图不自动上传。也可请求公共 HTTPS 正文链接；不携带浏览器登录态，不读取内网。静态提取不等于事实核实，动态网页可能需手动导入。
 5. 选择模型，明确允许发送当前目标、工作材料、前序成果和适用准则。“发送并开始”保存补充后生成；运行中补充会中止当前尝试，后续需核对用量再重新开始，不自动重复扣用量。
 6. 阅读成果和依据，在“交付约定与审阅”批准或填具体修改意见。所有审批绑定当前要求、材料、输出和检查版本。新材料/新补充/变更要求会失效旧依据。
-7. 导出 ZIP：文档有 document.md；Skill 有 skills/<name>/SKILL.md；系统有 system/ 源码、package.json、测试及说明。包内有版本、校验和、未完成项和排除项。
+7. 导出 ZIP：文档有 document.md；Skill 有 skills/<name>/SKILL.md；系统完成研发后才有 system/ 源码、测试及说明（Node 包含 package.json，Python 包含 server.py）。未完成工作可导出前序成果与历史，包内明确记录版本、校验和、未完成项和排除项。
 
 ## 三条交付路径
 
@@ -20,7 +20,7 @@
 | 文档 | 基于有来源的文本写作、补充修订、Markdown 阅读、结构检查与当前版本审批 | Markdown 与完整依据 ZIP；语义、专业结论和事实仍需用户审阅 |
 | 系统 | 研究 → PRD → UI/UX → 架构/团队宣讲 → 测试设计 → 研发/容器测试 → 产品/市场/技术终审 | 每个阶段独立角色调用、独立成果与批准；源码和实际日志传给下一阶段。阶段批准不会提前标记整项交付 |
 
-系统 MVP 支持**无外部依赖的 Node.js 或 Python 标准库 Web/API**：可含 HTML/CSS 页面、Node 模块和 node:test，用本地内存/JSON 明确限定数据能力。架构可交付 Mermaid 图定义，当前阅读器不自动渲染图。源码最多40文件/200KB。Python入口server.py，测试tests/test_*.py，固定unittest runner；执行栈写入合同，不可混用。研发时明确允许 Docker 和首次下载官方 Node 镜像；Docker Desktop 需已完成初始化。
+系统 MVP 支持**不安装第三方包的 Node.js 或 Python 标准库 Web/API**：可含 HTML/CSS 页面、Node 模块和 node:test，用本地内存/JSON 明确限定数据能力。Python 可通过标准库调用部署方显式配置的模型；不安装第三方包不等于把智能需求改成规则。离线容器单测应注入明确标注的模拟传输，真实模型链路另行验证。架构可交付 Mermaid 图定义，当前阅读器不自动渲染图。源码最多40文件/200KB。Python入口server.py，测试tests/test_*.py，固定unittest runner；执行栈写入合同，不可混用。研发时明确允许 Docker 和首次下载官方基础镜像；Docker Desktop 需已完成初始化。
 
 固定 runner 以摘要锁定官方基础镜像，只使用受信任 Dockerfile 的 COPY，不执行模型写的安装/构建脚本；测试容器断网、非 root、只读、无宿主挂载、无 Docker socket，限制内存/CPU/进程数和时间。至少两条未跳过的真实测试才可通过机器门槛。测试绿灯仍不证明全部业务正确。
 
