@@ -122,6 +122,8 @@ export class PiRuntime implements Runtime {
                   "memories",
                   "-c",
                   'web_search="disabled"',
+                  "-c",
+                  'model_reasoning_effort="low"',
                   "--json",
                   ...(p.model_id ? ["--model", p.model_id] : []),
                   "-",
@@ -143,7 +145,9 @@ export class PiRuntime implements Runtime {
               };
               signal.addEventListener("abort", abort, { once: true });
               if (signal.aborted) abort();
-              const timeout = setTimeout(abort, 240000);
+              // Long architecture and source bundles need more time than a short chat reply.
+              // Keep a bounded deadline; abort and unknown-usage reconciliation still apply.
+              const timeout = setTimeout(abort, 600000);
               child.stdout.on("data", (d: Buffer) => {
                 bytes += d.length;
                 if (bytes > 8 * 1024 * 1024) {
