@@ -1,0 +1,28 @@
+{
+  "version": "0.3.1",
+  "date": "2026-10-13",
+  "sourceCommit": "9fb9944a6c14f48da8a205a21faf4215bcaa709a",
+  "distribution": "local-only, arm64; unsigned and not notarized",
+  "installer": {
+    "path": "release/Jojo Plan-0.3.1-arm64-mac.zip",
+    "bytes": 163007310,
+    "sha256": "775416d3451fa83ca26e0886fee16da11df978d0fa85dc53b95f455a327fbd1b"
+  },
+  "checks": {
+    "coreAndProtocol": 27,
+    "finalPackagedMaterials": 4,
+    "installerCrcAndTestedBundleMatch": true
+  },
+  "fixes": [
+    "Preserve real model integration without third-party packages",
+    "Explicit low Codex reasoning and bounded 600-second stage deadline"
+  ],
+  "liveProjectStatus": "Research, PRD and UIUX saved; architecture rejected for rules-only downgrade; full delivery not passed. Waiting for project budget confirmation.",
+  "userDataIncluded": false,
+  "original030AppReplaced": false,
+  "sourceArchive": {
+    "path": "deliverables/jojo-plan-0.3.1-source-and-docs.zip",
+    "bytes": 5286893,
+    "sha256": "884c1925248f2d88badfc9391aaca392d68bd3b2186449f767f58a14b35dfe2e"
+  }
+}
