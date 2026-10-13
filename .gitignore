@@ -3,4 +3,5 @@
 /dist/
 /release/
 /output/acceptance/
+/output/user-validation/
 *.tsbuildinfo

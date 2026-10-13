@@ -334,7 +334,7 @@ function App() {
         <div className="sidebar-foot">
           <button onClick={() => open("settings")}>模型与设置</button>
           <p>本地保存 · 真实状态</p>
-          <small>MVP / 0.3.0</small>
+          <small>MVP / 0.3.1</small>
         </div>
       </aside>
       <main>

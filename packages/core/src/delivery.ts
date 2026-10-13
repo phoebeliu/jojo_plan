@@ -29,7 +29,7 @@ export function instructions(
     design:
       "按PRD形成UIUX规格：信息架构、页面清单、每页组件和状态、操作与反馈、异常、空态、键盘与可访问性。",
     architecture:
-      "形成团队宣讲与系统分析设计：需求追踪、模块、接口、数据模型、Mermaid架构图/ER图/data flow、边界、安全、部署与回滚。MVP实现限定无外部依赖的Node.js Web/API，数据可用本地JSON。",
+      "形成团队宣讲与系统分析设计：需求追踪、模块、接口、数据模型、Mermaid架构图/ER图/data flow、边界、安全、部署与回滚。MVP实现限定不安装第三方包的Node.js Web/API，数据可用本地JSON。第三方包限制不等于禁止模型服务；若PRD要求智能生成，必须保留真实模型接入和验收，不得擅自降级为关键词规则或固定模板。模型地址、名称及凭据仅由部署方显式配置，不能内置密钥。隔离容器测试禁止联网，应注入模拟传输并注明，不能冒充真实模型证据。",
     "test-design":
       "形成测试分析设计：需求与测试矩阵、正常/异常/权限/回归用例、预期结果、测试数据、验收与发布门槛。不要把设计当实测。",
     implementation: `根据已批准的PRD、UX、架构和测试设计交付源码。输出 # 研发交付，说明假设与局限，然后且仅一个 fenced json 代码块：{"files":[{"path":"package.json","content":"..."},{"path":"server.mjs","content":"..."},{"path":"test/system.test.mjs","content":"..."}]}。文件最多40个，总内容最多200KB，只允许相对路径，不含依赖、锁文件、密钥或二进制。实现无外部依赖Node.js Web/API，所有测试使用 node:test（以 .test.mjs 结尾），含实质性正常与异常断言。固定runner运行 node --test。package.json需有 start:node server.mjs，type:module。可增加 public/ 页面、src/ 模块、README.md。测试导入服务时不得常驻listen，使用显式入口/工厂。根据上次真实失败日志修复；不能假称已通过。`,
@@ -39,11 +39,11 @@ export function instructions(
   if (runtime === "python") {
     if (stage === "architecture")
       return map[stage].replace(
-        "无外部依赖的Node.js Web/API",
-        "无外部依赖的Python标准库Web/API",
+        "不安装第三方包的Node.js Web/API",
+        "不安装第三方包的Python标准库Web/API（可使用urllib接入显式配置的模型服务）",
       );
     if (stage === "implementation")
-      return `根据批准成果交付Python标准库Web/API。输出 # 研发交付、假设与局限，且仅一个fenced json：{"runtime":"python","files":[{"path":"server.py","content":"..."},{"path":"tests/test_system.py","content":"..."},{"path":"README.md","content":"..."}]}。不安装依赖，不调用外网。入口 python server.py，导入时不启动服务，测试使用unittest至少两个正常/异常断言。固定runner: python -m unittest discover -s tests -v。最多40个文件/200KB，按真实失败日志修复，不能假称实测。`;
+      return `根据批准成果交付Python标准库Web/API。输出 # 研发交付、假设与局限，且仅一个fenced json：{"runtime":"python","files":[{"path":"server.py","content":"..."},{"path":"tests/test_system.py","content":"..."},{"path":"README.md","content":"..."}]}。不安装第三方包。隔离容器测试不调用外网，模型传输应可注入并用明确标注的模拟响应测试。若PRD要求智能生成，交付代码必须用标准库urllib等接入显式配置的真实模型，不得用关键词规则、固定模板或静默演示回退替代；未配置模型应明确报错。地址、模型与凭据只用服务端环境变量，不含密钥。真实模型链路没有实测证据必须标为未验证。入口 python server.py，导入时不启动服务，测试使用unittest至少两个正常/异常断言。固定runner: python -m unittest discover -s tests -v。最多40个文件/200KB，按真实失败日志修复，不能假称实测。`;
   }
   return map[stage];
 }
