@@ -1,0 +1,17 @@
+{
+  "version": "0.4.0-alpha.1",
+  "date": "2026-11-18",
+  "scope": "local Apple Silicon macOS Alpha",
+  "package": {
+    "path": "release/alpha-040-final/Jojo Plan-0.4.0-alpha.1-arm64-mac.zip",
+    "sizeBytes": 163010749,
+    "sha256": "66b7241301b5b9be9fe944686e98a28ae6b113844bbd6d19135c0078aa228f6f"
+  },
+  "verification": {
+    "typecheck": "passed",
+    "coreTestsPassed": 28,
+    "packagedDesktopChecksPassed": 12,
+    "userProjectContainerRealModelSample": "passed",
+    "userProjectFinalReview": "generated; pending owner acceptance"
+  }
+}

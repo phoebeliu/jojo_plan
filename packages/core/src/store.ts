@@ -461,6 +461,20 @@ export class Store {
         ),
       })),
       view: this.view(workId),
+      implementation:
+        w.kind === "system" ? this.implementationVersion(workId) : null,
+      preferredProviderId:
+        this.one(
+          "SELECT json_extract(config_json,'$.providerId') AS id FROM workflow_run WHERE work_id=? ORDER BY rowid DESC LIMIT 1",
+          workId,
+        )?.id ?? null,
+      latestRunError:
+        this.one(
+          `SELECT a.error_code FROM run_attempt a JOIN task t ON a.task_id=t.id
+         JOIN stage_run s ON t.stage_id=s.id JOIN workflow_run r ON r.id=s.run_id
+         WHERE r.work_id=? ORDER BY a.rowid DESC LIMIT 1`,
+          workId,
+        )?.error_code ?? null,
       budget: this.one("SELECT * FROM budget_account WHERE work_id=?", workId),
     };
   }
@@ -801,6 +815,103 @@ export class Store {
     );
     return plan.find((stage) => !approved.has(stage.id)) || plan.at(-1)!;
   }
+  implementationVersion(workId: string) {
+    const row = this.one(
+      `SELECT v.id FROM artifact_version v JOIN artifact a ON a.id=v.artifact_id
+       WHERE a.work_id=? AND a.kind='document'
+       AND json_extract(v.metadata_json,'$.stage')='implementation'
+       AND json_extract(v.metadata_json,'$.inputFingerprint')=?
+       AND EXISTS (SELECT 1 FROM baseline_member m JOIN baseline b ON b.id=m.baseline_id
+                   WHERE m.version_id=v.id AND m.purpose='output' AND b.valid=1 AND b.sealed_at IS NOT NULL)
+       ORDER BY v.rowid DESC LIMIT 1`,
+      workId,
+      this.inputFingerprint(workId),
+    );
+    return row ? this.readVersion(row.id) : null;
+  }
+  acceptanceEvidence(workId: string) {
+    const target = this.implementationVersion(workId);
+    if (!target) return [];
+    return this.all(
+      `SELECT v.id FROM artifact_link l JOIN artifact_version v ON v.id=l.consumer_id
+       WHERE l.producer_id=? AND l.relation='verifies'
+       AND json_extract(v.metadata_json,'$.purpose')='acceptance-observation'
+       ORDER BY v.rowid`,
+      target.id,
+    ).map((row) => this.readVersion(row.id));
+  }
+  recordEvidence(p: any) {
+    const work = this.work(p.workId);
+    if (work.kind !== "system" || work.state === "active")
+      fail("REVISION_CONFLICT", "请在系统研发暂停或待审阅时登记验收证据");
+    const target = this.implementationVersion(work.id);
+    if (
+      !target ||
+      target.id !== p.targetVersionId ||
+      target.object_hash !== p.targetSha256
+    )
+      fail("STALE_BASELINE", "证据须关联当前研发成果及其校验和");
+    const { criterion, environment, reviewer, notes } = Object.fromEntries(
+      ["criterion", "environment", "reviewer", "notes"].map((key) => [
+        key,
+        p[key].trim(),
+      ]),
+    );
+    if (!criterion || !environment || !reviewer || !notes)
+      fail("VALIDATION", "请填写验收项、环境、记录人和实测记录");
+    const evidence = this.acceptanceEvidence(work.id);
+    if (
+      evidence.length >= 40 ||
+      evidence.reduce(
+        (size, row) => size + row.size_bytes,
+        Buffer.byteLength(notes),
+      ) > 20000
+    )
+      fail("VALIDATION", "当前源码版本最多登记 40 条记录、合计 20 KB 正文");
+    const versionId = this.artifact(
+      work.id,
+      "test_evidence",
+      `验收记录 · ${criterion}`,
+      notes,
+      {
+        purpose: "acceptance-observation",
+        stage: "implementation",
+        criterion,
+        verdict: p.verdict,
+        environment,
+        reviewer,
+        targetVersionId: target.id,
+        targetSha256: target.object_hash,
+        inputFingerprint: this.inputFingerprint(work.id),
+      },
+      "user",
+    );
+    this.run(
+      "INSERT INTO artifact_link VALUES(?,?,?,?)",
+      versionId,
+      target.id,
+      "verifies",
+      criterion,
+    );
+    this.run(
+      `UPDATE baseline SET valid=0 WHERE stage_id IN (
+        SELECT s.id FROM stage_run s JOIN workflow_run r ON r.id=s.run_id
+        WHERE r.work_id=? AND s.stage_key='final-review')`,
+      work.id,
+    );
+    if (work.state === "delivered") {
+      this.run(
+        "UPDATE work_item SET state='paused',updated_at=? WHERE id=?",
+        now(),
+        work.id,
+      );
+    }
+    this.event("acceptance.recorded", work.project_id, work.id, {
+      versionId,
+      targetVersionId: target.id,
+    });
+    return { versionId };
+  }
   importMaterial(
     workId: string,
     name: string,
@@ -840,6 +951,8 @@ export class Store {
   }
   decide(p: any) {
     const w = this.work(p.workId);
+    if (w.state === "active")
+      fail("REVISION_CONFLICT", "请在运行结束或暂停后审阅当前版本");
     if (this.fingerprint(w.id) !== p.fingerprint)
       fail("STALE_BASELINE", "当前要求已改变，旧审批不能使用");
     const b = this.one(
@@ -1022,6 +1135,15 @@ export class Store {
       openItems: d.work.state === "delivered" ? [] : ["尚未通过当前版本审阅"],
       files: [],
       excluded: [],
+      acceptance: this.acceptanceEvidence(workId).map((entry) => ({
+        versionId: entry.id,
+        targetVersionId: entry.metadata.targetVersionId,
+        targetSha256: entry.metadata.targetSha256,
+        criterion: entry.metadata.criterion,
+        verdict: entry.metadata.verdict,
+        environment: entry.metadata.environment,
+        reviewer: entry.metadata.reviewer,
+      })),
     };
     for (const a of d.artifacts) {
       if (a.sensitivity === "restricted") {

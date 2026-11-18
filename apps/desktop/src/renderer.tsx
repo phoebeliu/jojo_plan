@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
+declare const JOJO_VERSION: string;
 declare global {
   interface Window {
     jojo: {
@@ -17,35 +18,178 @@ declare global {
 }
 function Markdown({ text }: { text: string }) {
   const blocks = text.split(/(```[\s\S]*?```)/g);
+  const cells = (value: string) =>
+    value
+      .trim()
+      .replace(/^\||\|$/g, "")
+      .split("|")
+      .map((cell) => cell.trim());
+  const tableLine = (value?: string) => value?.trim().startsWith("|");
+  const divider = (value?: string) =>
+    !!value &&
+    tableLine(value) &&
+    cells(value).every((cell) => /^:?-{3,}:?$/.test(cell));
   return (
     <div className="markdown">
-      {blocks.map((block, i) =>
-        block.startsWith("```") ? (
-          <pre key={i}>
-            <code>
-              {block.replace(/^```[^\n]*\n?/, "").replace(/```$/, "")}
-            </code>
-          </pre>
-        ) : (
-          block.split("\n").map((line, j) => {
-            const h = /^(#{1,4})\s+(.+)/.exec(line);
-            if (h)
-              return React.createElement(
-                `h${Math.min(h[1].length + 1, 5)}`,
-                { key: `${i}-${j}` },
-                h[2],
-              );
-            if (/^[-*]\s+/.test(line))
-              return (
-                <p className="list-line" key={`${i}-${j}`}>
-                  • {line.slice(2)}
-                </p>
-              );
-            return line.trim() ? <p key={`${i}-${j}`}>{line}</p> : null;
-          })
-        ),
-      )}
+      {blocks.map((block, i) => {
+        if (block.startsWith("```"))
+          return (
+            <pre key={i}>
+              <code>
+                {block.replace(/^```[^\n]*\n?/, "").replace(/```$/, "")}
+              </code>
+            </pre>
+          );
+        let tableEnd = -1;
+        return block.split("\n").map((line, j, lines) => {
+          if (j <= tableEnd) return null;
+          if (tableLine(line) && divider(lines[j + 1])) {
+            const header = cells(line);
+            const rows = [];
+            for (let k = j + 2; tableLine(lines[k]); k++)
+              rows.push(cells(lines[k]));
+            tableEnd = j + 1 + rows.length;
+            return (
+              <div
+                className="table-scroll"
+                key={j}
+                tabIndex={0}
+                aria-label="表格"
+              >
+                <table>
+                  <thead>
+                    <tr>
+                      {header.map((cell, k) => (
+                        <th key={k} scope="col">
+                          {cell}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((row, k) => (
+                      <tr key={k}>
+                        {header.map((_, n) => (
+                          <td key={n}>{row[n] ?? ""}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
+          }
+          const h = /^(#{1,4})\s+(.+)/.exec(line);
+          if (h)
+            return React.createElement(
+              `h${Math.min(h[1].length + 1, 5)}`,
+              { key: `${i}-${j}` },
+              h[2],
+            );
+          if (/^[-*]\s+/.test(line))
+            return (
+              <p className="list-line" key={`${i}-${j}`}>
+                • {line.slice(2)}
+              </p>
+            );
+          return line.trim() ? <p key={`${i}-${j}`}>{line}</p> : null;
+        });
+      })}
     </div>
+  );
+}
+const outcomeLabels: Record<string, string> = {
+  passed: "通过",
+  failed: "失败",
+  inconclusive: "证据不足",
+};
+function AcceptanceForm({
+  target,
+  records,
+  busy,
+  save,
+}: {
+  target: any;
+  records: any[];
+  busy: boolean;
+  save: (draft: any) => Promise<any>;
+}) {
+  const [submitting, setSubmitting] = useState(false);
+  return (
+    <article>
+      <h3>研发验收记录</h3>
+      <p className="note">
+        关联源码成果 {target.id} · SHA-256 {target.object_hash}
+      </p>
+      {records.map((entry) => (
+        <section key={entry.id}>
+          <h4>
+            {entry.metadata.criterion} · {outcomeLabels[entry.metadata.verdict]}
+          </h4>
+          <p>
+            {entry.metadata.reviewer} · {entry.metadata.environment}
+          </p>
+          <Markdown text={entry.text} />
+        </section>
+      ))}
+      <p>登记的结果供终审核对。新增记录会更新终审依据，保留研发及前序审阅。</p>
+      <form
+        onSubmit={async (event) => {
+          event.preventDefault();
+          if (submitting || busy) return;
+          const form = event.currentTarget;
+          const fields = Object.fromEntries(new FormData(form));
+          setSubmitting(true);
+          try {
+            if (
+              await save({
+                ...fields,
+                targetVersionId: target.id,
+                targetSha256: target.object_hash,
+              })
+            )
+              form.reset();
+          } finally {
+            setSubmitting(false);
+          }
+        }}
+      >
+        <fieldset disabled={busy || submitting}>
+          <label>
+            验收项
+            <input
+              name="criterion"
+              required
+              maxLength={120}
+              placeholder="例如 AC-21"
+            />
+          </label>
+          <label>
+            实测结果
+            <select name="verdict" defaultValue="inconclusive">
+              {Object.entries(outcomeLabels).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            环境
+            <input name="environment" required maxLength={500} />
+          </label>
+          <label>
+            记录人
+            <input name="reviewer" required maxLength={120} />
+          </label>
+          <label>
+            实测记录与证据位置
+            <textarea name="notes" required maxLength={4000} />
+          </label>
+          <button type="submit">登记验收记录</button>
+        </fieldset>
+      </form>
+    </article>
   );
 }
 const request = (
@@ -117,6 +261,7 @@ function App() {
         (t: any) => t.state === "running" && t.role !== "source-tool",
       ).length || 0,
     jobs = d?.jobs.filter((j: any) => j.state === "running").length || 0;
+  const active = w?.state === "active";
   async function refresh() {
     try {
       const r = await window.jojo.command(request("app.snapshot", {}));
@@ -144,12 +289,20 @@ function App() {
   useEffect(() => {
     if (!current && data.works.length) setCurrent(data.works[0].id);
     if (!project && data.projects.length) setProject(data.projects[0].id);
-    if (!provider && data.providers.length) setProvider(data.providers[0].id);
   }, [data]);
+  useEffect(() => {
+    if (!data.providers.length) return;
+    setProvider(
+      data.providers.find((p: any) => p.id === d?.preferredProviderId)?.id ||
+        data.providers[0].id,
+    );
+    setLimit(d?.budget?.token_limit ?? 200000);
+  }, [current, data.providers.length]);
   useEffect(() => {
     setAllow(false);
     setAllowContainer(false);
   }, [current, provider]);
+  useEffect(() => setReviewReason(""), [current, d?.fingerprint]);
   useEffect(() => {
     for (const el of document.querySelectorAll<HTMLElement>("main,.sidebar"))
       el.inert = !!panel;
@@ -334,7 +487,7 @@ function App() {
         <div className="sidebar-foot">
           <button onClick={() => open("settings")}>模型与设置</button>
           <p>本地保存 · 真实状态</p>
-          <small>MVP / 0.3.1</small>
+          <small>本机版 / {JOJO_VERSION}</small>
         </div>
       </aside>
       <main>
@@ -411,13 +564,26 @@ function App() {
                 <strong>
                   {w.state === "delivered"
                     ? "当前版本已审阅通过"
-                    : approvedStage
-                      ? `前序阶段已批准，可以开始${d.stage.title}`
-                      : currentBaseline
-                        ? "结构检查完成，等待你的语义审阅"
-                        : d.baselines.some((b: any) => !b.valid)
-                          ? "要求已变化，旧依据需重新验证"
-                          : "当前版本尚未形成有效验收依据"}
+                    : active
+                      ? `正在执行${d.stage.title}`
+                      : w.state === "cancelled"
+                        ? "当前工作已取消"
+                        : w.state === "blocked" && d.latestRunError
+                          ? (
+                              {
+                                PROVIDER_TIMEOUT: "模型调用超时",
+                                PROVIDER_FAILED: "模型运行失败，请查看执行记录",
+                                PROCESS_INTERRUPTED:
+                                  "上次运行中断，请核对用量后继续",
+                              } as Record<string, string>
+                            )[d.latestRunError] || "运行未完成，请查看执行记录"
+                          : approvedStage
+                            ? `前序阶段已批准，可以开始${d.stage.title}`
+                            : currentBaseline
+                              ? "结构检查完成，等待你的语义审阅"
+                              : d.baselines.some((b: any) => !b.valid)
+                                ? "要求已变化，旧依据需重新验证"
+                                : "当前版本尚未形成有效验收依据"}
                 </strong>
               </div>
               <button onClick={() => open("delivery")}>查看约定 →</button>
@@ -554,7 +720,7 @@ function App() {
                   <option value="">选择模型</option>
                   {data.providers.map((p: any) => (
                     <option key={p.id} value={p.id}>
-                      {p.name}
+                      {p.name} · {p.model_id || p.protocol}
                     </option>
                   ))}
                 </select>
@@ -589,10 +755,10 @@ function App() {
                       checked={allowContainer}
                       onChange={(e) => setAllowContainer(e.target.checked)}
                     />
-                    允许隔离测试与首次下载官方Node镜像
+                    允许隔离测试与首次下载官方基础镜像
                   </label>
                 )}
-                {running ? (
+                {active ? (
                   <button
                     onClick={() =>
                       call(
@@ -1205,6 +1371,25 @@ function App() {
                     ),
                   )}
                   <p className="note">当前指纹：{d.fingerprint}</p>
+                  {d.implementation && (
+                    <AcceptanceForm
+                      key={d.implementation.id}
+                      target={d.implementation}
+                      records={d.artifacts.filter(
+                        (a: any) =>
+                          a.metadata.purpose === "acceptance-observation" &&
+                          a.metadata.targetVersionId === d.implementation.id,
+                      )}
+                      busy={active}
+                      save={(draft) =>
+                        call(
+                          "evidence.record",
+                          { ...draft, workId: current },
+                          w.revision,
+                        )
+                      }
+                    />
+                  )}
                   {w.kind === "system" && (
                     <article>
                       <h3>组织团队返工</h3>
@@ -1249,7 +1434,7 @@ function App() {
                       placeholder="具体缺陷、修改方向与验收期待"
                     />
                   </label>
-                  {currentBaseline ? (
+                  {currentBaseline && !active ? (
                     <>
                       <p>
                         已形成当前版本结构依据。请阅读全部成果，确认语义、来源与局限后选择：

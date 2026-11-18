@@ -100,6 +100,16 @@ export const payloads = {
     text: { ...str, maxLength: 200000 },
     origin: { ...str, maxLength: 2000 },
   }),
+  "evidence.record": object({
+    workId: id,
+    targetVersionId: id,
+    targetSha256: { type: "string", pattern: "^[a-f0-9]{64}$" },
+    criterion: { ...str, maxLength: 120 },
+    verdict: { enum: ["passed", "failed", "inconclusive"] },
+    environment: { ...str, maxLength: 500 },
+    reviewer: { ...str, maxLength: 120 },
+    notes: { ...str, maxLength: 4000 },
+  }),
   "system.rework": object({
     workId: id,
     stage: {

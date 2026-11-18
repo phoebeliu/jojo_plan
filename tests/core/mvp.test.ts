@@ -423,3 +423,128 @@ test("system handoff exports code rather than the newer test-evidence artifact",
     t.close();
   }
 });
+
+test("post-development evidence is scoped to the current source and invalidates only terminal review", async () => {
+  const t = setup();
+  try {
+    const { p, w, provider } = await create(t, "system");
+    const fp = t.store.inputFingerprint(w.id);
+    function baseline(stage: string) {
+      const id = uid(),
+        run = uid(),
+        stageId = uid();
+      t.store.run(
+        "INSERT INTO workflow_run VALUES(?,?,?,?,?,?,?)",
+        run,
+        w.id,
+        "system@1.0.0",
+        "delivered",
+        "{}",
+        1,
+        "2026-11-18",
+      );
+      t.store.run(
+        "INSERT INTO stage_run VALUES(?,?,?,?,?,?)",
+        stageId,
+        run,
+        stage,
+        "passed",
+        1,
+        1,
+      );
+      const output = t.store.artifact(w.id, "document", stage, body, {
+        stage,
+        inputFingerprint: fp,
+      });
+      t.store.run(
+        "INSERT INTO baseline VALUES(?,?,?,?,?,?,?,?)",
+        id,
+        stageId,
+        t.store.fingerprint(w.id),
+        "approved",
+        1,
+        1,
+        null,
+        "2026-11-18",
+      );
+      t.store.run(
+        "INSERT INTO baseline_member VALUES(?,?,?)",
+        id,
+        output,
+        "output",
+      );
+      t.store.run(
+        "UPDATE baseline SET sealed_at=? WHERE id=?",
+        "2026-11-18",
+        id,
+      );
+      return { id, output };
+    }
+    const research = baseline("research");
+    for (const stage of ["product", "design", "architecture", "test-design"])
+      baseline(stage);
+    const code = baseline("implementation"),
+      final = baseline("final-review");
+    t.store.run("UPDATE work_item SET state='delivered' WHERE id=?", w.id);
+    const record = {
+      workId: w.id,
+      targetVersionId: code.output,
+      targetSha256: t.store.readVersion(code.output).object_hash,
+      criterion: "AC-21",
+      verdict: "inconclusive",
+      environment: "unit fixture",
+      reviewer: "tester",
+      notes: "演练证据，非真实模型",
+    };
+    const stale = await t.service.command(
+      request(
+        "evidence.record",
+        { ...record, targetVersionId: research.output },
+        p.id,
+        1,
+      ),
+    );
+    assert.equal(stale.error?.code, "STALE_BASELINE");
+    const other = await call(t, "project.create", { name: "另一个项目" });
+    const wrongProject = await t.service.command(
+      request("evidence.record", record, other.id, 1),
+    );
+    assert.equal(wrongProject.error?.code, "SCOPE_DENIED");
+    const denied = await t.service.command(
+      request("evidence.record", record, p.id, 1),
+      { kind: "agent", projectId: p.id, workId: w.id },
+    );
+    assert.equal(denied.error?.code, "PERMISSION_REQUIRED");
+    const saved = await call(t, "evidence.record", record, p.id, 1);
+    assert.equal(t.store.inputFingerprint(w.id), fp);
+    assert.equal(t.store.work(w.id).state, "paused");
+    for (const b of [research, code])
+      assert.equal(
+        t.store.one("SELECT valid FROM baseline WHERE id=?", b.id).valid,
+        1,
+      );
+    assert.equal(
+      t.store.one("SELECT valid FROM baseline WHERE id=?", final.id).valid,
+      0,
+    );
+    assert.equal(t.store.acceptanceEvidence(w.id)[0].id, saved.versionId);
+    assert.equal(
+      t.store.export(w.id).manifest.acceptance[0].targetSha256,
+      record.targetSha256,
+    );
+    assert.equal(t.store.nextStage(w.id).id, "final-review");
+    const review = await run(t, w, p, provider);
+    assert.match(t.prompts.at(-1)!, /演练证据，非真实模型/);
+    const draft = review.baselines.find((b) => b.valid && b.status === "draft");
+    assert.ok(
+      t.store.one(
+        "SELECT 1 FROM baseline_member WHERE baseline_id=? AND version_id=? AND purpose='evidence'",
+        draft.id,
+        saved.versionId,
+      ),
+    );
+    assert.equal(t.store.work(w.id).state, "paused");
+  } finally {
+    t.close();
+  }
+});

@@ -34,6 +34,7 @@ export class PiRuntime implements Runtime {
     signal: AbortSignal,
     onEvent: (e: any) => void,
   ) {
+    let timedOut = false;
     const model: Model<any> = {
       id: p.model_id || "configured-default",
       name: p.name,
@@ -147,7 +148,10 @@ export class PiRuntime implements Runtime {
               if (signal.aborted) abort();
               // Long architecture and source bundles need more time than a short chat reply.
               // Keep a bounded deadline; abort and unknown-usage reconciliation still apply.
-              const timeout = setTimeout(abort, 600000);
+              const timeout = setTimeout(() => {
+                timedOut = true;
+                abort();
+              }, 600000);
               child.stdout.on("data", (d: Buffer) => {
                 bytes += d.length;
                 if (bytes > 8 * 1024 * 1024) {
@@ -251,7 +255,7 @@ export class PiRuntime implements Runtime {
         last.stopReason === "aborted" ||
         signal.aborted
       )
-        throw Error("PROVIDER_FAILED");
+        throw Error(timedOut ? "PROVIDER_TIMEOUT" : "PROVIDER_FAILED");
       if (p.protocol !== "codex-local")
         usage = {
           inputTokens: last.usage?.input ?? null,

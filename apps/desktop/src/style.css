@@ -553,6 +553,27 @@ footer {
   overflow-wrap: anywhere;
   line-height: 1.75;
 }
+.table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  margin-block: 12px;
+}
+.markdown table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.markdown :is(th, td) {
+  text-align: left;
+  vertical-align: top;
+  padding: 8px 12px;
+  border: 1px solid currentColor;
+}
+.panel-content fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
 .markdown p {
   white-space: pre-wrap;
   margin: 0.35rem 0;

@@ -570,6 +570,103 @@
           ]
         },
         "method": {
+          "const": "evidence.record"
+        },
+        "expectedRevision": {
+          "anyOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "workId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "targetVersionId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "targetSha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "criterion": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "verdict": {
+              "enum": ["passed", "failed", "inconclusive"]
+            },
+            "environment": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500
+            },
+            "reviewer": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 120
+            },
+            "notes": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4000
+            }
+          },
+          "required": [
+            "workId",
+            "targetVersionId",
+            "targetSha256",
+            "criterion",
+            "verdict",
+            "environment",
+            "reviewer",
+            "notes"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "requestId",
+        "projectId",
+        "method",
+        "expectedRevision",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "schemaVersion": {
+          "const": 2
+        },
+        "requestId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "projectId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "uuid"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "method": {
           "const": "system.rework"
         },
         "expectedRevision": {

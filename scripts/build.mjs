@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { build } from "esbuild";
-import { mkdirSync, copyFileSync } from "node:fs";
+import { mkdirSync, copyFileSync, readFileSync } from "node:fs";
 mkdirSync("dist", { recursive: true });
 await build({
   entryPoints: ["apps/desktop/src/main.ts"],
@@ -36,6 +36,11 @@ await build({
   platform: "browser",
   format: "iife",
   target: "chrome130",
+  define: {
+    JOJO_VERSION: JSON.stringify(
+      JSON.parse(readFileSync("package.json", "utf8")).version,
+    ),
+  },
 });
 copyFileSync("apps/desktop/src/index.html", "dist/index.html");
 copyFileSync("apps/desktop/src/style.css", "dist/style.css");
