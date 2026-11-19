@@ -1,6 +1,6 @@
 # Jojo Plan · 本机 Alpha
 
-最新包为 0.4.0-alpha.1，[本轮验收与升级说明](v040-alpha1-review.md)。下文保留 0.3.1 的操作基线。
+最新包为 0.4.0-alpha.2。终审确认后，审阅面板显示「审批已保存，当前版本已交付」及导出按钮。阶段审批后显示可开始的下一阶段。原有审批会继续沿用。参阅[本机安装包清单](../../deliverables/jojo-plan-0.4.0-alpha.2-release-manifest.json)和[验收与升级说明](v040-alpha1-review.md)。下文保留 0.3.1 的操作基线。
 
 2026-10-13。[本机实测与修正](v031-review.md)、[材料/Python 验收](v03-review.md)。定位仍为“AI 项目负责人的个人交付替身”。已有 Skill、文档和小型系统样例验证；不代表任意真实项目都已跑通。本轮 Intelligent UI 工作已生成研究、PRD 和 UIUX，架构初稿被拒绝，尚未交付运行系统。完整产品目标仍见 JP-1.1＋S2。[MVP 验收报告](mvp-review.md)区分真实模型、合成用例、协议 fixture 和尚未验证的能力。
 

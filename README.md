@@ -2,7 +2,7 @@
 
 AI 项目负责人的个人交付替身：按你认可的方法组织工作，用可追溯的依据验收，并提供适合当前任务的交互。个人化与效率优势仍待真实任务验证。
 
-当前已有 **Jojo Plan 0.4.0-alpha.1 本机验收版**，新增绑定源码版本的研发验收记录。支持有来源的 Skill／文档交付与七阶段系统研发。参阅[本次更新](docs/implementation/v040-alpha1-review.md)、[运行入口](docs/implementation/README.md)和[迭代计划](docs/implementation/next-iteration-plan.md)。
+当前已有 **Jojo Plan 0.4.0-alpha.2 本机验收版**，支持绑定源码版本的研发验收记录，完成终审后显示已交付及导出入口。参阅[本次更新](docs/implementation/README.md)、[验收记录](docs/implementation/v040-alpha1-review.md)和[迭代计划](docs/implementation/next-iteration-plan.md)。
 
 - [开发交接包：阅读入口](docs/spec/00-reading-guide.md)
 - [需要用户拍板的默认方案](docs/spec/01-owner-decisions.md)

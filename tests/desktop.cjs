@@ -108,6 +108,26 @@ let app;
     },
   );
   await check(
+    "An approved version shows its receipt and export action",
+    async () => {
+      await page.getByRole("button", { name: "查看约定 →" }).click();
+      const review = page.locator(".panel-content");
+      await review
+        .getByRole("status")
+        .filter({ hasText: "审批已保存，当前版本已交付。" })
+        .waitFor();
+      assert(
+        await review.getByRole("button", { name: "导出交接包" }).isEnabled(),
+        "Export action missing",
+      );
+      assert(
+        !(await review.getByText("审批不可用", { exact: false }).count()),
+        "Approved version shows an error",
+      );
+      await page.getByLabel("关闭详情").click();
+    },
+  );
+  await check(
     "Requirements change invalidates native approval controls",
     async () => {
       await page.getByRole("button", { name: "修改要求 / 预演影响" }).click();
@@ -217,6 +237,10 @@ let app;
         await page
           .getByRole("button", { name: "确认当前版本满足约定" })
           .click();
+        await page
+          .getByRole("status")
+          .filter({ hasText: "审批已保存，当前版本已交付。" })
+          .waitFor();
         await page.getByLabel("关闭详情").click();
         await page
           .locator(".outcome")

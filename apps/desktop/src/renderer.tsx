@@ -396,6 +396,17 @@ function App() {
       w.revision,
     );
   }
+  async function exportHandoff() {
+    setError("");
+    try {
+      const result = await window.jojo.export(
+        request("data.export", { workId: current }, pid),
+      );
+      if (result.ok === false) setError(result.error.message);
+    } catch {
+      setError("交接包未能保存，请检查目标位置后重试。");
+    }
+  }
   const currentBaseline = d?.baselines
     .filter(
       (b: any) =>
@@ -692,15 +703,7 @@ function App() {
                   <button onClick={() => open("change")}>
                     修改要求 / 预演影响
                   </button>
-                  <button
-                    onClick={async () => {
-                      await window.jojo.export(
-                        request("data.export", { workId: current }, pid),
-                      );
-                    }}
-                  >
-                    导出交接包
-                  </button>
+                  <button onClick={exportHandoff}>导出交接包</button>
                 </div>
               </section>
             </div>
@@ -1426,15 +1429,28 @@ function App() {
                     </article>
                   )}
 
-                  <label>
-                    审阅意见（要求修改时必填）
-                    <textarea
-                      value={reviewReason}
-                      onChange={(e) => setReviewReason(e.target.value)}
-                      placeholder="具体缺陷、修改方向与验收期待"
-                    />
-                  </label>
-                  {currentBaseline && !active ? (
+                  {(currentBaseline || w.kind === "system") && !active && (
+                    <label>
+                      {w.state === "delivered"
+                        ? "返工意见"
+                        : "审阅意见（要求修改时必填）"}
+                      <textarea
+                        value={reviewReason}
+                        onChange={(e) => setReviewReason(e.target.value)}
+                        placeholder="具体缺陷、修改方向与验收期待"
+                      />
+                    </label>
+                  )}
+                  {w.state === "delivered" ? (
+                    <>
+                      <p role="status">审批已保存，当前版本已交付。</p>
+                      <button className="primary" onClick={exportHandoff}>
+                        导出交接包
+                      </button>
+                    </>
+                  ) : active ? (
+                    <p role="status">正在执行，完成检查后可审阅。</p>
+                  ) : currentBaseline ? (
                     <>
                       <p>
                         已形成当前版本结构依据。请阅读全部成果，确认语义、来源与局限后选择：
@@ -1476,6 +1492,10 @@ function App() {
                         需要修改
                       </button>
                     </>
+                  ) : approvedStage ? (
+                    <p role="status">
+                      审批已保存。关闭详情后即可开始{d.stage.title}。
+                    </p>
                   ) : (
                     <p className="note">
                       当前版本没有有效检查基线，审批不可用。
